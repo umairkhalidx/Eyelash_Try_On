@@ -1,4 +1,28 @@
-// Eyelash Recommendation System
+// eyelash-system.js
+
+// ---------- EYELASH DETECTION SETUP ----------
+const LEFT_EYE_UPPER = [246, 161, 160, 159, 158, 157, 173, 133, 155, 154, 153, 145, 144, 163, 7];
+const RIGHT_EYE_UPPER = [466, 388, 387, 386, 385, 384, 398, 362, 382, 381, 380, 374, 373, 390, 249];
+
+const LEFT_EYE_INNER = 133;
+const LEFT_EYE_OUTER = 33;
+const RIGHT_EYE_INNER = 362;
+const RIGHT_EYE_OUTER = 263;
+
+// ---------- EYELASH NAME MAPPING ----------
+const EYELASH_NAMES = {
+    "Drunk In Love": "Drunk In Love",
+    "Wedding Day": "Wedding Day",
+    "Foxy": "Foxy",
+    "Flare": "Flare",
+    "Vixen": "Vixen",
+    "Other Half 1": "Other Half 1",
+    "Other Half 2": "Other Half 2",
+    "Staycation": "Staycation",
+    "Iconic": "Iconic"
+};
+
+// ---------- EYELASH RECOMMENDATION SYSTEM ----------
 class EyelashRecommendationSystem {
     constructor() {
         // Eye landmarks indices
@@ -102,10 +126,22 @@ class EyelashRecommendationSystem {
         const measurements = {};
         
         // Convert landmarks to pixel coordinates
-        const rightEyeInner = [landmarks[this.RIGHT_EYE_INNER].x * imgWidth, landmarks[this.RIGHT_EYE_INNER].y * imgHeight];
-        const rightEyeOuter = [landmarks[this.RIGHT_EYE_OUTER].x * imgWidth, landmarks[this.RIGHT_EYE_OUTER].y * imgHeight];
-        const leftEyeInner = [landmarks[this.LEFT_EYE_INNER].x * imgWidth, landmarks[this.LEFT_EYE_INNER].y * imgHeight];
-        const leftEyeOuter = [landmarks[this.LEFT_EYE_OUTER].x * imgWidth, landmarks[this.LEFT_EYE_OUTER].y * imgHeight];
+        const rightEyeInner = [
+            landmarks[this.RIGHT_EYE_INNER].x * imgWidth,
+            landmarks[this.RIGHT_EYE_INNER].y * imgHeight
+        ];
+        const rightEyeOuter = [
+            landmarks[this.RIGHT_EYE_OUTER].x * imgWidth,
+            landmarks[this.RIGHT_EYE_OUTER].y * imgHeight
+        ];
+        const leftEyeInner = [
+            landmarks[this.LEFT_EYE_INNER].x * imgWidth,
+            landmarks[this.LEFT_EYE_INNER].y * imgHeight
+        ];
+        const leftEyeOuter = [
+            landmarks[this.LEFT_EYE_OUTER].x * imgWidth,
+            landmarks[this.LEFT_EYE_OUTER].y * imgHeight
+        ];
         
         // Right eye measurements
         const rightEyeTop = [landmarks[159].x * imgWidth, landmarks[159].y * imgHeight];
@@ -191,35 +227,52 @@ class EyelashRecommendationSystem {
         const angle = measurements.avg_eye_angle;
         const lidVisibility = measurements.avg_lid_visibility;
         
+        // Eye shape classification
         if (lidVisibility < 0.3) {
             return "Hooded";
         } else if (ear > 0.5) {
             return "Round";
         } else if (ear < 0.35) {
-            if (angle > 2) return "Upturned";
-            else if (angle < -2) return "Downturned";
-            else return "Almond";
+            if (angle > 2) {
+                return "Upturned";
+            } else if (angle < -2) {
+                return "Downturned";
+            } else {
+                return "Almond";
+            }
         } else {
-            if (angle > 3) return "Upturned";
-            else if (angle < -3) return "Downturned";
-            else return "Almond";
+            if (angle > 3) {
+                return "Upturned";
+            } else if (angle < -3) {
+                return "Downturned";
+            } else {
+                return "Almond";
+            }
         }
     }
     
     classifyEyeSize(measurements) {
         const eyeWidthRatio = measurements.avg_eye_width_relative;
         
-        if (eyeWidthRatio < 0.15) return "Small";
-        else if (eyeWidthRatio > 0.18) return "Large";
-        else return "Medium";
+        if (eyeWidthRatio < 0.15) {
+            return "Small";
+        } else if (eyeWidthRatio > 0.18) {
+            return "Large";
+        } else {
+            return "Medium";
+        }
     }
     
     classifyEyeSpacing(measurements) {
         const interEyeRatio = measurements.inter_eye_ratio;
         
-        if (interEyeRatio < 0.95) return "Close-set";
-        else if (interEyeRatio > 1.15) return "Wide-set";
-        else return "Average-set";
+        if (interEyeRatio < 0.95) {
+            return "Close-set";
+        } else if (interEyeRatio > 1.15) {
+            return "Wide-set";
+        } else {
+            return "Average-set";
+        }
     }
     
     calculateMatchScore(shape, size, spacing, productDetails) {
@@ -231,10 +284,10 @@ class EyelashRecommendationSystem {
         }
         
         // Prioritize universal products
-        if (productDetails.suitable_sizes.length === 3) {
+        if (productDetails.suitable_sizes.length === 3) { // Universal size
             score += 10;
         }
-        if (productDetails.suitable_shapes.length >= 4) {
+        if (productDetails.suitable_shapes.length >= 4) { // Works with many shapes
             score += 10;
         }
         
@@ -257,10 +310,12 @@ class EyelashRecommendationSystem {
     }
     
     recommendEyelashes(shape, size, spacing) {
+        // Find matching products
         const recommendedProducts = [];
         
         for (const [category, products] of Object.entries(this.inventory)) {
             for (const [productName, details] of Object.entries(products)) {
+                // Check if product matches eye size and shape
                 const sizeMatch = details.suitable_sizes.includes(size);
                 const shapeMatch = details.suitable_shapes.includes(shape);
                 
@@ -278,15 +333,21 @@ class EyelashRecommendationSystem {
             }
         }
         
+        // Sort by match score
         recommendedProducts.sort((a, b) => b.match_score - a.match_score);
-        const topRecommendations = recommendedProducts.slice(0, 3);
         
+        // Get top 3 recommendations
+        const topRecommendations = recommendedProducts.length >= 3 ? 
+            recommendedProducts.slice(0, 3) : recommendedProducts;
+        
+        // Spacing-based application tips
         const spacingTips = {
             "Close-set": "Focus application on outer 2/3 of lash line to create width",
             "Wide-set": "Focus application on inner 2/3 of lash line to bring eyes closer",
             "Average-set": "Apply evenly across entire lash line for balanced look"
         };
         
+        // Shape-based tips
         const shapeTips = {
             "Hooded": "Your hooded eyes look best with curled, wispy lashes that lift and open the eye. Avoid heavy styles.",
             "Round": "Elongate your beautiful round eyes with cat-eye styles that emphasize the outer corners.",
@@ -303,343 +364,191 @@ class EyelashRecommendationSystem {
             total_matches: recommendedProducts.length
         };
     }
-}
-
-// Eyelash Try-On System
-class EyelashTryOnSystem {
-    constructor() {
-        this.LEFT_EYE_UPPER = [246, 161, 160, 159, 158, 157, 173, 133, 155, 154, 153, 145, 144, 163, 7];
-        this.RIGHT_EYE_UPPER = [466, 388, 387, 386, 385, 384, 398, 362, 382, 381, 380, 374, 373, 390, 249];
-        this.LEFT_EYE_INNER = 133;
-        this.LEFT_EYE_OUTER = 33;
-        this.RIGHT_EYE_INNER = 362;
-        this.RIGHT_EYE_OUTER = 263;
-        
-        this.faceMesh = null;
-        this.initialized = false;
-        this.eyelashImages = {};
-    }
     
-    async initialize() {
-        if (this.initialized) return;
-        
-        this.faceMesh = new FaceMesh({
-            locateFile: (file) => {
-                return `https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/${file}`;
-            }
-        });
-        
-        this.faceMesh.setOptions({
-            maxNumFaces: 1,
-            refineLandmarks: true,
-            minDetectionConfidence: 0.5,
-            minTrackingConfidence: 0.5
-        });
-        
-        // Preload eyelash images
-        await this.preloadEyelashImages();
-        this.initialized = true;
-    }
-    
-    async preloadEyelashImages() {
-        const eyelashNames = [
-            "Drunk In Love", "Wedding Day", "Foxy", "Flare", "Vixen",
-            "Other Half 1", "Other Half 2", "Staycation", "Iconic"
-        ];
-        
-        for (const name of eyelashNames) {
-            try {
-                const img = await this.loadImage(`eyelashes/${name}.png`);
-                this.eyelashImages[name] = img;
-            } catch (error) {
-                console.warn(`Could not load eyelash image for ${name}:`, error);
-            }
-        }
-    }
-    
-    loadImage(src) {
+    async analyzeAndRecommend(imageElement) {
         return new Promise((resolve, reject) => {
-            const img = new Image();
-            img.crossOrigin = "anonymous";
-            img.onload = () => resolve(img);
-            img.onerror = reject;
-            img.src = src;
-        });
-    }
-    
-    rotateImage(canvas, angle) {
-        if (angle === 0) return canvas;
-        
-        const tempCanvas = document.createElement('canvas');
-        const tempCtx = tempCanvas.getContext('2d');
-        
-        const radians = angle * Math.PI / 180;
-        const sin = Math.abs(Math.sin(radians));
-        const cos = Math.abs(Math.cos(radians));
-        
-        const width = canvas.width;
-        const height = canvas.height;
-        
-        const newWidth = width * cos + height * sin;
-        const newHeight = width * sin + height * cos;
-        
-        tempCanvas.width = newWidth;
-        tempCanvas.height = newHeight;
-        
-        tempCtx.translate(newWidth / 2, newHeight / 2);
-        tempCtx.rotate(radians);
-        tempCtx.drawImage(canvas, -width / 2, -height / 2);
-        
-        return tempCanvas;
-    }
-    
-    getEyeRegionInfo(landmarks, eyeUpperIndices, innerIdx, outerIdx) {
-        const upperPoints = eyeUpperIndices.map(i => landmarks[i]);
-        const inner = landmarks[innerIdx];
-        const outer = landmarks[outerIdx];
-        
-        const eyeWidth = Math.sqrt((outer.x - inner.x)**2 + (outer.y - inner.y)**2);
-        const centerX = (inner.x + outer.x) / 2;
-        const centerY = upperPoints.reduce((sum, point) => sum + point.y, 0) / upperPoints.length;
-        
-        return {
-            centerX: centerX,
-            centerY: centerY,
-            width: eyeWidth
-        };
-    }
-    
-    async processEyelashTryOn(image, eyelashName, adjustments = {}) {
-        if (!this.initialized) {
-            await this.initialize();
-        }
-        
-        const {
-            verticalOffset = -10,
-            horizontalOffset = 0,
-            sizeScale = 2.0,
-            heightScale = 1.0,
-            rotationAngle = 0
-        } = adjustments;
-        
-        const eyelashImg = this.eyelashImages[eyelashName];
-        if (!eyelashImg) {
-            throw new Error(`Eyelash image for ${eyelashName} not found`);
-        }
-        
-        // Create canvas for the image
-        const canvas = document.createElement('canvas');
-        const ctx = canvas.getContext('2d');
-        canvas.width = image.width;
-        canvas.height = image.height;
-        ctx.drawImage(image, 0, 0);
-        
-        // Convert to format for FaceMesh
-        const tempCanvas = document.createElement('canvas');
-        const tempCtx = tempCanvas.getContext('2d');
-        tempCanvas.width = image.width;
-        tempCanvas.height = image.height;
-        tempCtx.drawImage(image, 0, 0);
-        
-        const imageData = tempCtx.getImageData(0, 0, tempCanvas.width, tempCanvas.height);
-        
-        return new Promise((resolve, reject) => {
-            this.faceMesh.onResults((results) => {
+            // Create canvas for image processing
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            
+            canvas.width = imageElement.width;
+            canvas.height = imageElement.height;
+            ctx.drawImage(imageElement, 0, 0);
+            
+            const imgWidth = canvas.width;
+            const imgHeight = canvas.height;
+            
+            // Initialize MediaPipe Face Mesh
+            const faceMesh = new FaceMesh({
+                locateFile: (file) => {
+                    return `https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/${file}`;
+                }
+            });
+            
+            faceMesh.setOptions({
+                staticImageMode: true,
+                maxNumFaces: 1,
+                refineLandmarks: true,
+                minDetectionConfidence: 0.5
+            });
+            
+            faceMesh.onResults((results) => {
                 if (!results.multiFaceLandmarks || results.multiFaceLandmarks.length === 0) {
                     reject(new Error("No face detected in image"));
                     return;
                 }
                 
                 const landmarks = results.multiFaceLandmarks[0];
-                const width = canvas.width;
-                const height = canvas.height;
                 
-                // Convert landmarks to pixel coordinates
-                const pixelLandmarks = landmarks.map(lm => ({
-                    x: lm.x * width,
-                    y: lm.y * height
-                }));
+                // Get measurements
+                const measurements = this.getEyeMeasurements(landmarks, imgWidth, imgHeight);
                 
-                const leftInfo = this.getEyeRegionInfo(
-                    pixelLandmarks, 
-                    this.LEFT_EYE_UPPER, 
-                    this.LEFT_EYE_INNER, 
-                    this.LEFT_EYE_OUTER
-                );
+                // Classify eyes
+                const eyeShape = this.classifyEyeShape(measurements);
+                const eyeSize = this.classifyEyeSize(measurements);
+                const eyeSpacing = this.classifyEyeSpacing(measurements);
                 
-                const rightInfo = this.getEyeRegionInfo(
-                    pixelLandmarks,
-                    this.RIGHT_EYE_UPPER,
-                    this.RIGHT_EYE_INNER,
-                    this.RIGHT_EYE_OUTER
-                );
+                // Get recommendations
+                const recommendations = this.recommendEyelashes(eyeShape, eyeSize, eyeSpacing);
                 
-                const lashAspect = eyelashImg.width / eyelashImg.height;
-                
-                // Apply adjustments for left eye
-                const lw = leftInfo.width * sizeScale;
-                const lh = (lw / lashAspect) * heightScale;
-                const lx = leftInfo.centerX - lw / 2 + horizontalOffset;
-                const ly = leftInfo.centerY + verticalOffset - lh / 2;
-                
-                // Apply adjustments for right eye
-                const rw = rightInfo.width * sizeScale;
-                const rh = (rw / lashAspect) * heightScale;
-                const rx = rightInfo.centerX - rw / 2 - horizontalOffset;
-                const ry = rightInfo.centerY + verticalOffset - rh / 2;
-                
-                // Apply eyelashes with rotation
-                this.applyEyelash(canvas, eyelashImg, rx, ry, rw, rh, -rotationAngle);
-                
-                // Flip for left eye and apply
-                const flippedCanvas = document.createElement('canvas');
-                const flippedCtx = flippedCanvas.getContext('2d');
-                flippedCanvas.width = eyelashImg.width;
-                flippedCanvas.height = eyelashImg.height;
-                flippedCtx.scale(-1, 1);
-                flippedCtx.drawImage(eyelashImg, -eyelashImg.width, 0);
-                
-                this.applyEyelash(canvas, flippedCanvas, lx, ly, lw, lh, rotationAngle);
-                
-                resolve(canvas);
+                // Compile results
+                resolve({
+                    classification: {
+                        eye_shape: eyeShape,
+                        eye_size: eyeSize,
+                        eye_spacing: eyeSpacing
+                    },
+                    measurements: {
+                        eye_aspect_ratio: Math.round(measurements.avg_ear * 1000) / 1000,
+                        eye_angle: Math.round(measurements.avg_eye_angle * 100) / 100,
+                        lid_visibility: Math.round(measurements.avg_lid_visibility * 1000) / 1000,
+                        inter_eye_ratio: Math.round(measurements.inter_eye_ratio * 1000) / 1000,
+                        eye_width_to_face_ratio: Math.round(measurements.avg_eye_width_relative * 1000) / 1000,
+                        symmetry_score: Math.round(measurements.symmetry_score * 1000) / 1000
+                    },
+                    recommendations: recommendations
+                });
             });
             
-            this.faceMesh.send({image: imageData});
+            // Process the image
+            faceMesh.send({ image: canvas });
         });
     }
+}
+
+// Initialize the recommender globally
+const recommender = new EyelashRecommendationSystem();
+
+// ---------- HELPER FUNCTIONS FOR TRY-ON ----------
+function rotateImage(image, angle) {
+    if (angle === 0) {
+        return image;
+    }
     
-    applyEyelash(canvas, eyelashImg, x, y, width, height, rotationAngle) {
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    
+    const width = image.width;
+    const height = image.height;
+    
+    // Set canvas size to accommodate rotation
+    const radians = angle * Math.PI / 180;
+    const sin = Math.abs(Math.sin(radians));
+    const cos = Math.abs(Math.cos(radians));
+    const newWidth = Math.floor(width * cos + height * sin);
+    const newHeight = Math.floor(height * cos + width * sin);
+    
+    canvas.width = newWidth;
+    canvas.height = newHeight;
+    
+    // Translate to center and rotate
+    ctx.translate(newWidth / 2, newHeight / 2);
+    ctx.rotate(radians);
+    ctx.drawImage(image, -width / 2, -height / 2);
+    
+    return canvas;
+}
+
+function overlayTransparentImage(background, overlayImg, x, y, width, height, rotationAngle = 0) {
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    
+    canvas.width = background.width;
+    canvas.height = background.height;
+    
+    // Draw background
+    ctx.drawImage(background, 0, 0);
+    
+    // Prepare overlay
+    let overlayCanvas = document.createElement('canvas');
+    let overlayCtx = overlayCanvas.getContext('2d');
+    
+    overlayCanvas.width = width;
+    overlayCanvas.height = height;
+    overlayCtx.drawImage(overlayImg, 0, 0, width, height);
+    
+    // Apply rotation if specified
+    if (rotationAngle !== 0) {
+        overlayCanvas = rotateImage(overlayCanvas, rotationAngle);
+        
+        // Adjust position to keep center at same location
+        x = x - (overlayCanvas.width - width) / 2;
+        y = y - (overlayCanvas.height - height) / 2;
+        
+        // Update dimensions
+        width = overlayCanvas.width;
+        height = overlayCanvas.height;
+    }
+    
+    // Draw overlay with transparency
+    ctx.globalCompositeOperation = 'source-over';
+    ctx.drawImage(overlayCanvas, x, y, width, height);
+    
+    return canvas;
+}
+
+function getEyeRegionInfo(landmarks, eyeUpperIndices, innerIdx, outerIdx, imgWidth, imgHeight) {
+    const upperPoints = eyeUpperIndices.map(i => ({
+        x: landmarks[i].x * imgWidth,
+        y: landmarks[i].y * imgHeight
+    }));
+    
+    const inner = {
+        x: landmarks[innerIdx].x * imgWidth,
+        y: landmarks[innerIdx].y * imgHeight
+    };
+    
+    const outer = {
+        x: landmarks[outerIdx].x * imgWidth,
+        y: landmarks[outerIdx].y * imgHeight
+    };
+    
+    const eyeWidth = Math.sqrt((outer.x - inner.x) ** 2 + (outer.y - inner.y) ** 2);
+    const centerX = (inner.x + outer.x) / 2;
+    const centerY = upperPoints.reduce((sum, point) => sum + point.y, 0) / upperPoints.length;
+    
+    return {
+        centerX: Math.round(centerX),
+        centerY: Math.round(centerY),
+        width: Math.round(eyeWidth)
+    };
+}
+
+async function processEyelash(imageElement, eyelashImg, verticalOffset = -10, horizontalOffset = 0, 
+                           sizeScale = 2.0, heightScale = 1.0, rotationAngle = 0) {
+    return new Promise((resolve, reject) => {
+        // Create canvas for processing
+        const canvas = document.createElement('canvas');
         const ctx = canvas.getContext('2d');
         
-        // Create temporary canvas for rotation
-        let rotatedEyelash = document.createElement('canvas');
-        rotatedEyelash.width = eyelashImg.width;
-        rotatedEyelash.height = eyelashImg.height;
-        const tempCtx = rotatedEyelash.getContext('2d');
-        tempCtx.drawImage(eyelashImg, 0, 0);
+        canvas.width = imageElement.width;
+        canvas.height = imageElement.height;
+        ctx.drawImage(imageElement, 0, 0);
         
-        // Apply rotation if needed
-        if (rotationAngle !== 0) {
-            rotatedEyelash = this.rotateImage(rotatedEyelash, rotationAngle);
-        }
+        const imgWidth = canvas.width;
+        const imgHeight = canvas.height;
         
-        // Draw the eyelash
-        ctx.drawImage(rotatedEyelash, x, y, width, height);
-    }
-}
-
-// Global instances
-const recommender = new EyelashRecommendationSystem();
-const tryOnSystem = new EyelashTryOnSystem();
-
-// DOM elements
-const imageInput = document.getElementById('imageInput');
-const analyzeBtn = document.getElementById('analyzeBtn');
-const tryOnBtn = document.getElementById('tryOnBtn');
-const resultCanvas = document.getElementById('resultCanvas');
-const recommendationsDiv = document.getElementById('recommendations');
-const loadingDiv = document.getElementById('loading');
-
-// Event listeners for range inputs
-document.getElementById('verticalOffset').addEventListener('input', updateValueDisplay);
-document.getElementById('horizontalOffset').addEventListener('input', updateValueDisplay);
-document.getElementById('sizeScale').addEventListener('input', updateValueDisplay);
-document.getElementById('heightScale').addEventListener('input', updateValueDisplay);
-document.getElementById('rotationAngle').addEventListener('input', updateValueDisplay);
-
-function updateValueDisplay(e) {
-    const target = e.target;
-    const valueDisplay = document.getElementById(target.id + 'Value');
-    valueDisplay.textContent = target.value;
-}
-
-let currentImage = null;
-let analysisResults = null;
-
-// Initialize the system
-tryOnSystem.initialize().catch(console.error);
-
-async function analyzeImage() {
-    if (!imageInput.files[0]) {
-        alert('Please select an image first');
-        return;
-    }
-    
-    showLoading(true);
-    
-    try {
-        const image = await loadImageFromFile(imageInput.files[0]);
-        currentImage = image;
-        
-        // Display original image
-        const ctx = resultCanvas.getContext('2d');
-        resultCanvas.width = image.width;
-        resultCanvas.height = image.height;
-        ctx.drawImage(image, 0, 0);
-        
-        // Analyze with FaceMesh for recommendations
-        const analysis = await analyzeWithFaceMesh(image);
-        analysisResults = analysis;
-        
-        displayRecommendations(analysis);
-        tryOnBtn.disabled = false;
-        
-    } catch (error) {
-        alert('Error analyzing image: ' + error.message);
-        console.error(error);
-    } finally {
-        showLoading(false);
-    }
-}
-
-async function tryOnEyelashes() {
-    if (!currentImage) {
-        alert('Please analyze an image first');
-        return;
-    }
-    
-    showLoading(true);
-    
-    try {
-        const eyelashName = document.getElementById('eyelashSelect').value;
-        const adjustments = {
-            verticalOffset: parseInt(document.getElementById('verticalOffset').value),
-            horizontalOffset: parseInt(document.getElementById('horizontalOffset').value),
-            sizeScale: parseFloat(document.getElementById('sizeScale').value),
-            heightScale: parseFloat(document.getElementById('heightScale').value),
-            rotationAngle: parseFloat(document.getElementById('rotationAngle').value)
-        };
-        
-        const resultCanvas = await tryOnSystem.processEyelashTryOn(
-            currentImage, 
-            eyelashName, 
-            adjustments
-        );
-        
-        const ctx = document.getElementById('resultCanvas').getContext('2d');
-        document.getElementById('resultCanvas').width = resultCanvas.width;
-        document.getElementById('resultCanvas').height = resultCanvas.height;
-        ctx.drawImage(resultCanvas, 0, 0);
-        
-    } catch (error) {
-        alert('Error applying eyelashes: ' + error.message);
-        console.error(error);
-    } finally {
-        showLoading(false);
-    }
-}
-
-function loadImageFromFile(file) {
-    return new Promise((resolve, reject) => {
-        const img = new Image();
-        img.onload = () => resolve(img);
-        img.onerror = reject;
-        img.src = URL.createObjectURL(file);
-    });
-}
-
-function analyzeWithFaceMesh(image) {
-    return new Promise((resolve, reject) => {
+        // Initialize MediaPipe Face Mesh
         const faceMesh = new FaceMesh({
             locateFile: (file) => {
                 return `https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/${file}`;
@@ -655,92 +564,122 @@ function analyzeWithFaceMesh(image) {
         
         faceMesh.onResults((results) => {
             if (!results.multiFaceLandmarks || results.multiFaceLandmarks.length === 0) {
-                reject(new Error("No face detected in image"));
+                reject(new Error("No face detected"));
                 return;
             }
             
             const landmarks = results.multiFaceLandmarks[0];
-            const measurements = recommender.getEyeMeasurements(landmarks, image.width, image.height);
             
-            const eyeShape = recommender.classifyEyeShape(measurements);
-            const eyeSize = recommender.classifyEyeSize(measurements);
-            const eyeSpacing = recommender.classifyEyeSpacing(measurements);
+            const leftInfo = getEyeRegionInfo(landmarks, LEFT_EYE_UPPER, LEFT_EYE_INNER, LEFT_EYE_OUTER, imgWidth, imgHeight);
+            const rightInfo = getEyeRegionInfo(landmarks, RIGHT_EYE_UPPER, RIGHT_EYE_INNER, RIGHT_EYE_OUTER, imgWidth, imgHeight);
             
-            const recommendations = recommender.recommendEyelashes(eyeShape, eyeSize, eyeSpacing);
+            const lashAspect = eyelashImg.width / eyelashImg.height;
             
-            resolve({
-                classification: {
-                    eye_shape: eyeShape,
-                    eye_size: eyeSize,
-                    eye_spacing: eyeSpacing
-                },
-                measurements: {
-                    eye_aspect_ratio: Math.round(measurements.avg_ear * 1000) / 1000,
-                    eye_angle: Math.round(measurements.avg_eye_angle * 100) / 100,
-                    lid_visibility: Math.round(measurements.avg_lid_visibility * 1000) / 1000,
-                    inter_eye_ratio: Math.round(measurements.inter_eye_ratio * 1000) / 1000,
-                    eye_width_to_face_ratio: Math.round(measurements.avg_eye_width_relative * 1000) / 1000,
-                    symmetry_score: Math.round(measurements.symmetry_score * 1000) / 1000
-                },
-                recommendations: recommendations
-            });
+            // Apply adjustments
+            // LEFT EYE
+            const lw = Math.round(leftInfo.width * sizeScale);
+            const lh = Math.round((lw / lashAspect) * heightScale);
+            const lx = leftInfo.centerX - Math.round(lw / 2) + horizontalOffset;
+            const ly = leftInfo.centerY + verticalOffset - Math.round(lh / 2);
+            
+            // RIGHT EYE (negative rotation for mirrored eye)
+            const rw = Math.round(rightInfo.width * sizeScale);
+            const rh = Math.round((rw / lashAspect) * heightScale);
+            const rx = rightInfo.centerX - Math.round(rw / 2) - horizontalOffset;
+            const ry = rightInfo.centerY + verticalOffset - Math.round(rh / 2);
+            
+            // Apply eyelashes with rotation
+            let resultCanvas = overlayTransparentImage(canvas, eyelashImg, rx, ry, rw, rh, -rotationAngle);
+            
+            // Flip for left eye
+            const flippedCanvas = document.createElement('canvas');
+            const flippedCtx = flippedCanvas.getContext('2d');
+            flippedCanvas.width = eyelashImg.width;
+            flippedCanvas.height = eyelashImg.height;
+            flippedCtx.scale(-1, 1);
+            flippedCtx.drawImage(eyelashImg, -eyelashImg.width, 0);
+            
+            resultCanvas = overlayTransparentImage(resultCanvas, flippedCanvas, lx, ly, lw, lh, rotationAngle);
+            
+            resolve(resultCanvas.toDataURL('image/jpeg'));
         });
         
-        // Convert image to format for FaceMesh
-        const canvas = document.createElement('canvas');
-        const ctx = canvas.getContext('2d');
-        canvas.width = image.width;
-        canvas.height = image.height;
-        ctx.drawImage(image, 0, 0);
-        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-        
-        faceMesh.send({image: imageData});
+        // Process the image
+        faceMesh.send({ image: canvas });
     });
 }
 
-function displayRecommendations(analysis) {
-    const { classification, measurements, recommendations } = analysis;
+// ---------- API FUNCTIONS ----------
+class EyelashAPI {
+    static getDefaultSettings() {
+        return {
+            default_settings: {
+                vertical_offset: -10,
+                horizontal_offset: 0,
+                size_scale: 2.0,
+                height_scale: 1.0,
+                rotation_angle: 0
+            },
+            valid_ranges: {
+                vertical_offset: { min: -50, max: 50 },
+                horizontal_offset: { min: -50, max: 50 },
+                size_scale: { min: 0.5, max: 3.0 },
+                height_scale: { min: 0.5, max: 2.0 },
+                rotation_angle: { min: -45, max: 45 }
+            }
+        };
+    }
     
-    let html = `
-        <h3>Eye Analysis Results</h3>
-        <div class="recommendation">
-            <p><strong>Shape:</strong> ${classification.eye_shape}</p>
-            <p><strong>Size:</strong> ${classification.eye_size}</p>
-            <p><strong>Spacing:</strong> ${classification.eye_spacing}</p>
-            <p><strong>Symmetry Score:</strong> ${measurements.symmetry_score}</p>
-        </div>
+    static getEyelashes() {
+        const eyelashesInfo = [];
         
-        <h3>Top Recommendations</h3>
-    `;
-    
-    recommendations.top_picks.forEach((product, index) => {
-        const isTopPick = index === 0;
-        html += `
-            <div class="recommendation ${isTopPick ? 'top-pick' : ''}">
-                <h4>${product.name} (Match: ${product.match_score}%)</h4>
-                <p><strong>Category:</strong> ${product.category}</p>
-                <p><strong>Style:</strong> ${product.style_type}</p>
-                <p><strong>Intensity:</strong> ${product.intensity}</p>
-                <p><strong>Look:</strong> ${product.look}</p>
-                <p>${product.description}</p>
-                ${isTopPick ? '<p><strong>🌟 BEST MATCH</strong></p>' : ''}
-            </div>
-        `;
-    });
-    
-    html += `
-        <div class="recommendation">
-            <h4>Application Tips</h4>
-            <p><strong>Shape-specific:</strong> ${recommendations.shape_tip}</p>
-            <p><strong>Spacing:</strong> ${recommendations.application_tip}</p>
-        </div>
+        for (const [category, products] of Object.entries(recommender.inventory)) {
+            for (const [name, details] of Object.entries(products)) {
+                eyelashesInfo.push({
+                    name: name,
+                    category: category,
+                    style: details.style_type,
+                    intensity: details.intensity,
+                    look: details.look,
+                    description: details.description,
+                    suitable_sizes: details.suitable_sizes,
+                    suitable_shapes: details.suitable_shapes
+                });
+            }
+        }
         
-        <p><em>Found ${recommendations.total_matches} suitable eyelash styles</em></p>
-    `;
+        return {
+            success: true,
+            total: eyelashesInfo.length,
+            eyelashes: eyelashesInfo
+        };
+    }
     
-    recommendationsDiv.innerHTML = html;
+    static validateAdjustmentParams(params) {
+        const { vertical_offset, horizontal_offset, size_scale, height_scale, rotation_angle } = params;
+        
+        if (vertical_offset < -50 || vertical_offset > 50) {
+            throw new Error("Vertical offset must be between -50 and 50");
+        }
+        if (horizontal_offset < -50 || horizontal_offset > 50) {
+            throw new Error("Horizontal offset must be between -50 and 50");
+        }
+        if (size_scale < 0.5 || size_scale > 3.0) {
+            throw new Error("Size scale must be between 0.5 and 3.0");
+        }
+        if (height_scale < 0.5 || height_scale > 2.0) {
+            throw new Error("Height scale must be between 0.5 and 2.0");
+        }
+        if (rotation_angle < -45 || rotation_angle > 45) {
+            throw new Error("Rotation angle must be between -45 and 45 degrees");
+        }
+    }
 }
 
-function showLoading(show) {
-    loadingDiv.style.display = show ? 'block' : 'none';
-}
+// Export for use in HTML
+window.EyelashSystem = {
+    EyelashRecommendationSystem: recommender,
+    processEyelash,
+    EyelashAPI,
+    EYELASH_NAMES
+};
