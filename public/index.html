@@ -4,1080 +4,1214 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Eyelash Try-On & Recommendation System</title>
-    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/control_utils/control_utils.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/face_mesh.js"></script>
+    
+    <!-- TensorFlow.js and Face Landmarks Detection -->
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/face-landmarks-detection"></script>
+    
     <style>
-        :root {
-            --primary: #8a6dcc;
-            --primary-dark: #6a4ca8;
-            --secondary: #f8f9fa;
-            --dark: #343a40;
-            --light: #ffffff;
-            --gray: #6c757d;
-            --success: #28a745;
-            --warning: #ffc107;
-            --danger: #dc3545;
-            --border-radius: 8px;
-            --box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-            --transition: all 0.3s ease;
-        }
-
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
-
+        
         body {
-            background-color: #f5f7fb;
-            color: var(--dark);
-            line-height: 1.6;
-        }
-
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
             padding: 20px;
         }
-
-        header {
-            text-align: center;
-            margin-bottom: 30px;
-            padding: 20px 0;
-        }
-
-        h1 {
-            color: var(--primary);
-            margin-bottom: 10px;
-            font-weight: 700;
-        }
-
-        .subtitle {
-            color: var(--gray);
-            font-size: 1.1rem;
-        }
-
-        .card {
-            background: var(--light);
-            border-radius: var(--border-radius);
-            box-shadow: var(--box-shadow);
-            padding: 25px;
-            margin-bottom: 25px;
-        }
-
-        .card-title {
-            font-size: 1.3rem;
-            margin-bottom: 15px;
-            color: var(--primary);
-            border-bottom: 1px solid #eee;
-            padding-bottom: 10px;
-        }
-
-        .image-section {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 20px;
-        }
-
-        .image-container {
-            width: 100%;
-            max-width: 500px;
-            height: 400px;
-            border: 2px dashed #ddd;
-            border-radius: var(--border-radius);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            overflow: hidden;
-            position: relative;
-            background-color: #f8f9fa;
-        }
-
-        .image-container img, .image-container canvas {
-            max-width: 100%;
-            max-height: 100%;
-            object-fit: contain;
-        }
-
-        .camera-overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            pointer-events: none;
-        }
-
-        .face-guide {
-            width: 70%;
-            height: 70%;
-            border: 3px solid var(--warning);
-            border-radius: 10px;
-            position: relative;
-        }
-
-        .face-guide::before {
-            content: "Position face inside this box";
-            position: absolute;
-            top: -30px;
-            left: 0;
-            width: 100%;
-            text-align: center;
-            color: var(--warning);
-            font-weight: 500;
-        }
-
-        .btn-group {
-            display: flex;
-            gap: 15px;
-            flex-wrap: wrap;
-            justify-content: center;
-        }
-
-        .btn {
-            padding: 10px 20px;
-            border: none;
-            border-radius: var(--border-radius);
-            cursor: pointer;
-            font-weight: 600;
-            transition: var(--transition);
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-        }
-
-        .btn-primary {
-            background-color: var(--primary);
-            color: white;
-        }
-
-        .btn-primary:hover {
-            background-color: var(--primary-dark);
-        }
-
-        .btn-secondary {
-            background-color: var(--secondary);
-            color: var(--dark);
-            border: 1px solid #ddd;
-        }
-
-        .btn-secondary:hover {
-            background-color: #e9ecef;
-        }
-
-        .btn-success {
-            background-color: var(--success);
-            color: white;
-        }
-
-        .btn-success:hover {
-            background-color: #218838;
-        }
-
-        .btn-danger {
-            background-color: var(--danger);
-            color: white;
-        }
-
-        .btn-danger:hover {
-            background-color: #c82333;
-        }
-
-        .hidden {
-            display: none !important;
-        }
-
-        .controls-section {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
-        }
-
-        .adjustment-controls {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
-
-        .control-group {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-
-        .control-label {
-            font-weight: 600;
-            display: flex;
-            justify-content: space-between;
-        }
-
-        .control-value {
-            color: var(--primary);
-            font-weight: 700;
-        }
-
-        .slider {
-            -webkit-appearance: none;
-            width: 100%;
-            height: 8px;
-            border-radius: 4px;
-            background: #ddd;
-            outline: none;
-        }
-
-        .slider::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            width: 20px;
-            height: 20px;
-            border-radius: 50%;
-            background: var(--primary);
-            cursor: pointer;
-        }
-
-        .eyelash-selection {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-            gap: 15px;
-            margin-top: 15px;
-        }
-
-        .eyelash-option {
-            border: 2px solid #eee;
-            border-radius: var(--border-radius);
-            padding: 15px;
-            text-align: center;
-            cursor: pointer;
-            transition: var(--transition);
-        }
-
-        .eyelash-option:hover {
-            border-color: var(--primary);
-            transform: translateY(-3px);
-        }
-
-        .eyelash-option.active {
-            border-color: var(--primary);
-            background-color: rgba(138, 109, 204, 0.1);
-        }
-
-        .eyelash-name {
-            font-weight: 600;
-            margin-top: 8px;
-        }
-
-        .recommendation-results {
-            margin-top: 20px;
-        }
-
-        .recommendation-card {
-            border: 1px solid #eee;
-            border-radius: var(--border-radius);
-            padding: 15px;
-            margin-bottom: 15px;
-            transition: var(--transition);
-        }
-
-        .recommendation-card:hover {
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-        }
-
-        .recommendation-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 10px;
-        }
-
-        .recommendation-name {
-            font-weight: 700;
-            font-size: 1.1rem;
-            color: var(--primary);
-        }
-
-        .recommendation-category {
-            background-color: #e9ecef;
-            padding: 3px 8px;
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
             border-radius: 20px;
-            font-size: 0.8rem;
-        }
-
-        .recommendation-details {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-            margin-top: 10px;
-        }
-
-        .detail-item {
-            display: flex;
-            flex-direction: column;
-        }
-
-        .detail-label {
-            font-size: 0.8rem;
-            color: var(--gray);
-        }
-
-        .detail-value {
-            font-weight: 600;
-        }
-
-        .match-score {
-            display: flex;
-            align-items: center;
-            gap: 5px;
-        }
-
-        .score-bar {
-            flex-grow: 1;
-            height: 8px;
-            background-color: #e9ecef;
-            border-radius: 4px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
             overflow: hidden;
         }
-
-        .score-fill {
-            height: 100%;
-            background-color: var(--success);
-        }
-
-        .analysis-results {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-            gap: 15px;
-            margin-top: 15px;
-        }
-
-        .analysis-item {
-            background-color: #f8f9fa;
-            padding: 15px;
-            border-radius: var(--border-radius);
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
             text-align: center;
         }
-
-        .analysis-value {
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: var(--primary);
-            margin: 5px 0;
+        
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
         }
-
-        .analysis-label {
-            font-size: 0.9rem;
-            color: var(--gray);
+        
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
         }
-
-        .tips-section {
-            background-color: #e7f3ff;
-            border-left: 4px solid #4dabf7;
+        
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 2fr 1fr;
+            gap: 20px;
+            padding: 30px;
+        }
+        
+        .sidebar {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 20px;
+        }
+        
+        .center-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        
+        .image-container {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 500px;
+            position: relative;
+        }
+        
+        .video-wrapper {
+            position: relative;
+            display: inline-block;
+        }
+        
+        #video, #imagePreview {
+            max-width: 100%;
+            max-height: 500px;
+            border-radius: 10px;
+            display: none;
+        }
+        
+        #video.active, #imagePreview.active {
+            display: block;
+        }
+        
+        .face-guide {
+            position: absolute;
+            border: 3px dashed #ffd700;
+            border-radius: 50%;
+            pointer-events: none;
+            width: 300px;
+            height: 400px;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+        
+        .upload-prompt {
+            text-align: center;
+            color: #666;
+        }
+        
+        .upload-prompt svg {
+            width: 100px;
+            height: 100px;
+            margin-bottom: 20px;
+            opacity: 0.3;
+        }
+        
+        .section-title {
+            font-size: 1.3em;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: #333;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: 600;
+            transition: all 0.3s;
+            width: 100%;
+            margin-bottom: 10px;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .btn-secondary {
+            background: #6c757d;
+        }
+        
+        .btn-success {
+            background: #28a745;
+        }
+        
+        .btn-danger {
+            background: #dc3545;
+        }
+        
+        .btn-small {
+            padding: 8px 16px;
+            font-size: 0.9em;
+        }
+        
+        input[type="file"] {
+            display: none;
+        }
+        
+        .eyelash-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        
+        .eyelash-option {
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
+        }
+        
+        .eyelash-option:hover {
+            border-color: #667eea;
+            transform: scale(1.05);
+        }
+        
+        .eyelash-option.selected {
+            border-color: #667eea;
+            background: #f0f4ff;
+        }
+        
+        .eyelash-option h4 {
+            font-size: 0.95em;
+            margin-bottom: 5px;
+            color: #333;
+        }
+        
+        .controls-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+        
+        .control-group {
+            background: white;
             padding: 15px;
-            border-radius: 0 var(--border-radius) var(--border-radius) 0;
-            margin-top: 20px;
+            border-radius: 8px;
+            border: 1px solid #e0e0e0;
         }
-
-        .tip-title {
+        
+        .control-group label {
+            display: block;
             font-weight: 600;
             margin-bottom: 8px;
-            color: #1864ab;
+            color: #555;
+            font-size: 0.9em;
         }
-
-        .loading {
-            display: inline-block;
-            width: 20px;
-            height: 20px;
-            border: 3px solid rgba(255, 255, 255, 0.3);
-            border-radius: 50%;
-            border-top-color: white;
-            animation: spin 1s ease-in-out infinite;
+        
+        .control-group input[type="range"] {
+            width: 100%;
+            margin-bottom: 5px;
         }
-
-        @keyframes spin {
-            to { transform: rotate(360deg); }
+        
+        .control-value {
+            text-align: center;
+            font-weight: 600;
+            color: #667eea;
+            font-size: 0.9em;
         }
-
-        .camera-controls {
+        
+        .action-buttons {
             display: flex;
             gap: 10px;
-            justify-content: center;
             margin-top: 15px;
         }
-
-        @media (max-width: 768px) {
-            .controls-section {
+        
+        .recommendations-panel {
+            background: white;
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 15px;
+            border: 2px solid #e0e0e0;
+        }
+        
+        .recommendation-card {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            border-left: 4px solid #667eea;
+        }
+        
+        .recommendation-card h4 {
+            color: #667eea;
+            margin-bottom: 8px;
+        }
+        
+        .recommendation-card p {
+            color: #666;
+            font-size: 0.9em;
+            margin: 5px 0;
+        }
+        
+        .badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.8em;
+            font-weight: 600;
+            margin-right: 5px;
+            margin-top: 5px;
+        }
+        
+        .badge-primary {
+            background: #667eea;
+            color: white;
+        }
+        
+        .badge-success {
+            background: #28a745;
+            color: white;
+        }
+        
+        .badge-info {
+            background: #17a2b8;
+            color: white;
+        }
+        
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.7);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+        
+        .loading-overlay.active {
+            display: flex;
+        }
+        
+        .loading-content {
+            background: white;
+            padding: 40px;
+            border-radius: 15px;
+            text-align: center;
+        }
+        
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .alert {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+        
+        .alert-info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .alert-danger {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .classification-info {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+        
+        .classification-info h4 {
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+        
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        
+        .info-row:last-child {
+            border-bottom: none;
+        }
+        
+        .info-label {
+            font-weight: 600;
+            color: #555;
+        }
+        
+        .info-value {
+            color: #667eea;
+            font-weight: 600;
+        }
+        
+        canvas {
+            max-width: 100%;
+            border-radius: 10px;
+        }
+        
+        @media (max-width: 1200px) {
+            .main-content {
                 grid-template-columns: 1fr;
             }
             
-            .recommendation-details {
+            .controls-grid {
                 grid-template-columns: 1fr;
-            }
-            
-            .analysis-results {
-                grid-template-columns: 1fr 1fr;
             }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <header>
-            <h1>Eyelash Try-On & Recommendation System</h1>
-            <p class="subtitle">Upload or capture your photo to try on virtual eyelashes and get personalized recommendations</p>
-        </header>
-
-        <div class="card">
-            <h2 class="card-title">Upload or Capture Image</h2>
-            <div class="image-section">
-                <div class="image-container">
-                    <div id="placeholder" class="placeholder">
-                        <p>Your image will appear here</p>
+        <div class="header">
+            <h1>✨ Eyelash Try-On & Recommendation System</h1>
+            <p>Upload a photo or use your camera to try on eyelashes and get personalized recommendations</p>
+        </div>
+        
+        <div class="main-content">
+            <!-- Left Sidebar - Upload/Camera Options -->
+            <div class="sidebar">
+                <div class="section-title">
+                    📸 Capture Image
+                </div>
+                
+                <label for="fileUpload" class="btn">
+                    📁 Upload Photo
+                </label>
+                <input type="file" id="fileUpload" accept="image/*">
+                
+                <button class="btn btn-secondary" id="startCamera">
+                    📷 Open Camera
+                </button>
+                
+                <button class="btn btn-danger" id="capturePhoto" style="display: none;">
+                    📸 Capture Photo
+                </button>
+                
+                <button class="btn btn-secondary" id="stopCamera" style="display: none;">
+                    ⏹️ Stop Camera
+                </button>
+                
+                <div id="cameraStatus" class="alert alert-info" style="display: none; margin-top: 15px;">
+                    Position your face inside the yellow guide
+                </div>
+                
+                <hr style="margin: 20px 0; border: none; border-top: 1px solid #ddd;">
+                
+                <div class="section-title">
+                    💄 Select Eyelash Style
+                </div>
+                
+                <div class="eyelash-grid" id="eyelashGrid">
+                    <!-- Eyelash options will be populated here -->
+                </div>
+            </div>
+            
+            <!-- Center Panel - Image Display -->
+            <div class="center-panel">
+                <div class="image-container" id="imageContainer">
+                    <div class="upload-prompt" id="uploadPrompt">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/>
+                        </svg>
+                        <h3>Upload a photo or use your camera</h3>
+                        <p>to get started with virtual try-on</p>
                     </div>
-                    <div id="camera-overlay" class="camera-overlay hidden">
+                    
+                    <div class="video-wrapper" id="videoWrapper" style="display: none;">
+                        <video id="video" autoplay playsinline></video>
                         <div class="face-guide"></div>
                     </div>
-                    <img id="preview-image" class="hidden" alt="Preview">
-                    <canvas id="result-canvas" class="hidden"></canvas>
-                    <video id="camera-video" class="hidden" autoplay playsinline></video>
+                    
+                    <img id="imagePreview" alt="Preview">
+                    <canvas id="resultCanvas" style="display: none;"></canvas>
                 </div>
                 
-                <div class="btn-group">
-                    <button id="upload-btn" class="btn btn-primary">
-                        <i class="fas fa-upload"></i> Upload Image
+                <div class="action-buttons">
+                    <button class="btn btn-success" id="tryOnBtn" disabled>
+                        ✨ Try On Selected Eyelash
                     </button>
-                    <button id="camera-btn" class="btn btn-secondary">
-                        <i class="fas fa-camera"></i> Use Camera
+                    <button class="btn" id="recommendBtn" disabled>
+                        🎯 Get Recommendations
                     </button>
-                    <button id="capture-btn" class="btn btn-success hidden">
-                        <i class="fas fa-camera-retro"></i> Capture Photo
+                    <button class="btn btn-secondary" id="resetBtn" style="display: none;">
+                        🔄 Reset
                     </button>
-                    <button id="reset-btn" class="btn btn-danger hidden">
-                        <i class="fas fa-redo"></i> Reset
-                    </button>
-                </div>
-                
-                <input type="file" id="file-input" accept="image/*" class="hidden">
-            </div>
-        </div>
-
-        <div class="card hidden" id="action-section">
-            <h2 class="card-title">Choose Action</h2>
-            <div class="btn-group">
-                <button id="try-on-btn" class="btn btn-primary">
-                    <i class="fas fa-eye"></i> Try On Eyelashes
-                </button>
-                <button id="recommend-btn" class="btn btn-success">
-                    <i class="fas fa-magic"></i> Get Recommendations
-                </button>
-            </div>
-        </div>
-
-        <div class="card hidden" id="try-on-section">
-            <h2 class="card-title">Try On Eyelashes</h2>
-            
-            <div class="eyelash-selection">
-                <div class="eyelash-option active" data-eyelash="Drunk In Love">
-                    <div class="eyelash-preview">DL</div>
-                    <div class="eyelash-name">Drunk In Love</div>
-                </div>
-                <div class="eyelash-option" data-eyelash="Wedding Day">
-                    <div class="eyelash-preview">WD</div>
-                    <div class="eyelash-name">Wedding Day</div>
-                </div>
-                <div class="eyelash-option" data-eyelash="Foxy">
-                    <div class="eyelash-preview">FX</div>
-                    <div class="eyelash-name">Foxy</div>
-                </div>
-                <div class="eyelash-option" data-eyelash="Flare">
-                    <div class="eyelash-preview">FL</div>
-                    <div class="eyelash-name">Flare</div>
-                </div>
-                <div class="eyelash-option" data-eyelash="Vixen">
-                    <div class="eyelash-preview">VX</div>
-                    <div class="eyelash-name">Vixen</div>
-                </div>
-                <div class="eyelash-option" data-eyelash="Iconic">
-                    <div class="eyelash-preview">IC</div>
-                    <div class="eyelash-name">Iconic</div>
                 </div>
             </div>
             
-            <div class="controls-section">
-                <div class="adjustment-controls">
+            <!-- Right Sidebar - Controls & Recommendations -->
+            <div class="sidebar">
+                <div class="section-title">
+                    🎛️ Adjust Position
+                </div>
+                
+                <div class="controls-grid">
                     <div class="control-group">
-                        <div class="control-label">
-                            <span>Vertical Position</span>
-                            <span class="control-value" id="vertical-value">-10</span>
-                        </div>
-                        <input type="range" min="-50" max="50" value="-10" class="slider" id="vertical-slider">
+                        <label>Vertical Position</label>
+                        <input type="range" id="verticalOffset" min="-50" max="50" value="-10" step="1">
+                        <div class="control-value" id="verticalValue">-10</div>
                     </div>
                     
                     <div class="control-group">
-                        <div class="control-label">
-                            <span>Horizontal Position</span>
-                            <span class="control-value" id="horizontal-value">0</span>
-                        </div>
-                        <input type="range" min="-50" max="50" value="0" class="slider" id="horizontal-slider">
+                        <label>Horizontal Position</label>
+                        <input type="range" id="horizontalOffset" min="-50" max="50" value="0" step="1">
+                        <div class="control-value" id="horizontalValue">0</div>
                     </div>
                     
                     <div class="control-group">
-                        <div class="control-label">
-                            <span>Size Scale</span>
-                            <span class="control-value" id="size-value">2.0</span>
-                        </div>
-                        <input type="range" min="0.5" max="3.0" step="0.1" value="2.0" class="slider" id="size-slider">
+                        <label>Size Scale</label>
+                        <input type="range" id="sizeScale" min="0.5" max="3.0" value="2.0" step="0.1">
+                        <div class="control-value" id="sizeValue">2.0</div>
                     </div>
                     
                     <div class="control-group">
-                        <div class="control-label">
-                            <span>Height Scale</span>
-                            <span class="control-value" id="height-value">1.0</span>
-                        </div>
-                        <input type="range" min="0.5" max="2.0" step="0.1" value="1.0" class="slider" id="height-slider">
+                        <label>Height Scale</label>
+                        <input type="range" id="heightScale" min="0.5" max="2.0" value="1.0" step="0.1">
+                        <div class="control-value" id="heightValue">1.0</div>
                     </div>
                     
-                    <div class="control-group">
-                        <div class="control-label">
-                            <span>Rotation Angle</span>
-                            <span class="control-value" id="rotation-value">0</span>
-                        </div>
-                        <input type="range" min="-45" max="45" value="0" class="slider" id="rotation-slider">
+                    <div class="control-group" style="grid-column: 1 / -1;">
+                        <label>Rotation Angle</label>
+                        <input type="range" id="rotationAngle" min="-45" max="45" value="0" step="1">
+                        <div class="control-value" id="rotationValue">0°</div>
                     </div>
                 </div>
                 
-                <div class="preview-controls">
-                    <div class="btn-group">
-                        <button id="apply-eyelash-btn" class="btn btn-primary">
-                            <i class="fas fa-check"></i> Apply Eyelash
-                        </button>
-                        <button id="reset-adjustments-btn" class="btn btn-secondary">
-                            <i class="fas fa-undo"></i> Reset Adjustments
-                        </button>
+                <button class="btn" id="applyAdjustments" disabled>
+                    🔧 Apply Adjustments
+                </button>
+                
+                <button class="btn btn-secondary btn-small" id="resetControls">
+                    Reset to Default
+                </button>
+                
+                <hr style="margin: 20px 0; border: none; border-top: 1px solid #ddd;">
+                
+                <div id="recommendationsSection" style="display: none;">
+                    <div class="section-title">
+                        🎯 Your Eye Analysis
                     </div>
                     
-                    <div class="tips-section">
-                        <div class="tip-title">Adjustment Tips</div>
-                        <p>Use the sliders to fine-tune the eyelash position, size, and rotation for a perfect fit.</p>
+                    <div class="classification-info" id="classificationInfo">
+                        <!-- Classification results will appear here -->
+                    </div>
+                    
+                    <div class="section-title">
+                        💎 Top Recommendations
+                    </div>
+                    
+                    <div id="recommendationsContainer">
+                        <!-- Recommendations will appear here -->
                     </div>
                 </div>
-            </div>
-        </div>
-
-        <div class="card hidden" id="recommendation-section">
-            <h2 class="card-title">Personalized Recommendations</h2>
-            
-            <div id="analysis-results" class="analysis-results hidden">
-                <!-- Will be populated with analysis results -->
-            </div>
-            
-            <div id="recommendation-results" class="recommendation-results hidden">
-                <!-- Will be populated with recommendations -->
-            </div>
-            
-            <div class="btn-group">
-                <button id="analyze-btn" class="btn btn-primary">
-                    <span id="analyze-text">Analyze My Eyes</span>
-                    <span id="analyze-loading" class="loading hidden"></span>
-                </button>
             </div>
         </div>
     </div>
-
-    <script>
-        // DOM Elements
-        const fileInput = document.getElementById('file-input');
-        const uploadBtn = document.getElementById('upload-btn');
-        const cameraBtn = document.getElementById('camera-btn');
-        const captureBtn = document.getElementById('capture-btn');
-        const resetBtn = document.getElementById('reset-btn');
-        const previewImage = document.getElementById('preview-image');
-        const resultCanvas = document.getElementById('result-canvas');
-        const cameraVideo = document.getElementById('camera-video');
-        const placeholder = document.getElementById('placeholder');
-        const cameraOverlay = document.getElementById('camera-overlay');
-        
-        const actionSection = document.getElementById('action-section');
-        const tryOnSection = document.getElementById('try-on-section');
-        const recommendationSection = document.getElementById('recommendation-section');
-        
-        const tryOnBtn = document.getElementById('try-on-btn');
-        const recommendBtn = document.getElementById('recommend-btn');
-        const applyEyelashBtn = document.getElementById('apply-eyelash-btn');
-        const resetAdjustmentsBtn = document.getElementById('reset-adjustments-btn');
-        const analyzeBtn = document.getElementById('analyze-btn');
-        
-        const eyelashOptions = document.querySelectorAll('.eyelash-option');
-        
-        // Sliders
-        const verticalSlider = document.getElementById('vertical-slider');
-        const horizontalSlider = document.getElementById('horizontal-slider');
-        const sizeSlider = document.getElementById('size-slider');
-        const heightSlider = document.getElementById('height-slider');
-        const rotationSlider = document.getElementById('rotation-slider');
-        
-        // Value displays
-        const verticalValue = document.getElementById('vertical-value');
-        const horizontalValue = document.getElementById('horizontal-value');
-        const sizeValue = document.getElementById('size-value');
-        const heightValue = document.getElementById('height-value');
-        const rotationValue = document.getElementById('rotation-value');
-        
-        // Analysis and recommendation sections
-        const analysisResults = document.getElementById('analysis-results');
-        const recommendationResults = document.getElementById('recommendation-results');
-        const analyzeText = document.getElementById('analyze-text');
-        const analyzeLoading = document.getElementById('analyze-loading');
-        
-        // State variables
-        let currentImage = null;
-        let currentStream = null;
-        let selectedEyelash = 'Drunk In Love';
-        let adjustmentParams = {
-            vertical_offset: -10,
-            horizontal_offset: 0,
-            size_scale: 2.0,
-            height_scale: 1.0,
-            rotation_angle: 0
-        };
-
-        // Event Listeners
-        uploadBtn.addEventListener('click', () => fileInput.click());
-        fileInput.addEventListener('change', handleImageUpload);
-        cameraBtn.addEventListener('click', startCamera);
-        captureBtn.addEventListener('click', capturePhoto);
-        resetBtn.addEventListener('click', resetAll);
-        
-        tryOnBtn.addEventListener('click', showTryOnSection);
-        recommendBtn.addEventListener('click', showRecommendationSection);
-        applyEyelashBtn.addEventListener('click', applyEyelash);
-        resetAdjustmentsBtn.addEventListener('click', resetAdjustments);
-        analyzeBtn.addEventListener('click', analyzeEyes);
-        
-        // Eyelash selection
-        eyelashOptions.forEach(option => {
-            option.addEventListener('click', () => {
-                eyelashOptions.forEach(opt => opt.classList.remove('active'));
-                option.classList.add('active');
-                selectedEyelash = option.getAttribute('data-eyelash');
-            });
-        });
-        
-        // Slider events
-        verticalSlider.addEventListener('input', () => {
-            adjustmentParams.vertical_offset = parseInt(verticalSlider.value);
-            verticalValue.textContent = adjustmentParams.vertical_offset;
-        });
-        
-        horizontalSlider.addEventListener('input', () => {
-            adjustmentParams.horizontal_offset = parseInt(horizontalSlider.value);
-            horizontalValue.textContent = adjustmentParams.horizontal_offset;
-        });
-        
-        sizeSlider.addEventListener('input', () => {
-            adjustmentParams.size_scale = parseFloat(sizeSlider.value);
-            sizeValue.textContent = adjustmentParams.size_scale.toFixed(1);
-        });
-        
-        heightSlider.addEventListener('input', () => {
-            adjustmentParams.height_scale = parseFloat(heightSlider.value);
-            heightValue.textContent = adjustmentParams.height_scale.toFixed(1);
-        });
-        
-        rotationSlider.addEventListener('input', () => {
-            adjustmentParams.rotation_angle = parseFloat(rotationSlider.value);
-            rotationValue.textContent = adjustmentParams.rotation_angle;
-        });
-        
-        // Functions
-        function handleImageUpload(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-            
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                previewImage.src = e.target.result;
-                showImage(previewImage);
-                currentImage = previewImage;
-                showActionSection();
-            };
-            reader.readAsDataURL(file);
-        }
-        
-        async function startCamera() {
-            try {
-                const stream = await navigator.mediaDevices.getUserMedia({ 
-                    video: { 
-                        facingMode: 'user',
-                        width: { ideal: 1280 },
-                        height: { ideal: 720 }
-                    } 
-                });
-                
-                currentStream = stream;
-                cameraVideo.srcObject = stream;
-                showImage(cameraVideo);
-                cameraOverlay.classList.remove('hidden');
-                captureBtn.classList.remove('hidden');
-                resetBtn.classList.remove('hidden');
-                cameraBtn.disabled = true;
-                uploadBtn.disabled = true;
-            } catch (err) {
-                console.error('Error accessing camera:', err);
-                alert('Unable to access camera. Please check permissions and try again.');
-            }
-        }
-        
-        function capturePhoto() {
-            const canvas = document.createElement('canvas');
-            const context = canvas.getContext('2d');
-            
-            canvas.width = cameraVideo.videoWidth;
-            canvas.height = cameraVideo.videoHeight;
-            context.drawImage(cameraVideo, 0, 0, canvas.width, canvas.height);
-            
-            previewImage.src = canvas.toDataURL('image/png');
-            showImage(previewImage);
-            currentImage = previewImage;
-            
-            // Stop camera
-            if (currentStream) {
-                currentStream.getTracks().forEach(track => track.stop());
-                currentStream = null;
-            }
-            
-            cameraOverlay.classList.add('hidden');
-            captureBtn.classList.add('hidden');
-            cameraBtn.disabled = false;
-            uploadBtn.disabled = false;
-            
-            showActionSection();
-        }
-        
-        function showImage(element) {
-            placeholder.classList.add('hidden');
-            previewImage.classList.add('hidden');
-            resultCanvas.classList.add('hidden');
-            cameraVideo.classList.add('hidden');
-            
-            element.classList.remove('hidden');
-        }
-        
-        function showActionSection() {
-            actionSection.classList.remove('hidden');
-        }
-        
-        function showTryOnSection() {
-            tryOnSection.classList.remove('hidden');
-            recommendationSection.classList.add('hidden');
-        }
-        
-        function showRecommendationSection() {
-            recommendationSection.classList.remove('hidden');
-            tryOnSection.classList.add('hidden');
-        }
-        
-        function resetAll() {
-            // Stop camera if active
-            if (currentStream) {
-                currentStream.getTracks().forEach(track => track.stop());
-                currentStream = null;
-            }
-            
-            // Reset UI
-            placeholder.classList.remove('hidden');
-            previewImage.classList.add('hidden');
-            resultCanvas.classList.add('hidden');
-            cameraVideo.classList.add('hidden');
-            cameraOverlay.classList.add('hidden');
-            
-            actionSection.classList.add('hidden');
-            tryOnSection.classList.add('hidden');
-            recommendationSection.classList.add('hidden');
-            
-            captureBtn.classList.add('hidden');
-            resetBtn.classList.add('hidden');
-            
-            cameraBtn.disabled = false;
-            uploadBtn.disabled = false;
-            
-            // Reset file input
-            fileInput.value = '';
-            
-            // Reset analysis and recommendation sections
-            analysisResults.classList.add('hidden');
-            recommendationResults.classList.add('hidden');
-            analysisResults.innerHTML = '';
-            recommendationResults.innerHTML = '';
-            
-            currentImage = null;
-        }
-        
-        function resetAdjustments() {
-            adjustmentParams = {
-                vertical_offset: -10,
-                horizontal_offset: 0,
-                size_scale: 2.0,
-                height_scale: 1.0,
-                rotation_angle: 0
-            };
-            
-            verticalSlider.value = adjustmentParams.vertical_offset;
-            horizontalSlider.value = adjustmentParams.horizontal_offset;
-            sizeSlider.value = adjustmentParams.size_scale;
-            heightSlider.value = adjustmentParams.height_scale;
-            rotationSlider.value = adjustmentParams.rotation_angle;
-            
-            verticalValue.textContent = adjustmentParams.vertical_offset;
-            horizontalValue.textContent = adjustmentParams.horizontal_offset;
-            sizeValue.textContent = adjustmentParams.size_scale.toFixed(1);
-            heightValue.textContent = adjustmentParams.height_scale.toFixed(1);
-            rotationValue.textContent = adjustmentParams.rotation_angle;
-        }
-        
-        async function applyEyelash() {
-            if (!currentImage) {
-                alert('Please upload or capture an image first.');
-                return;
-            }
-            
-            // In a real implementation, this would call the processEyelash function
-            // from the eyelash-system.js file
-            try {
-                // Simulate processing delay
-                applyEyelashBtn.disabled = true;
-                applyEyelashBtn.innerHTML = '<div class="loading"></div> Processing...';
-                
-                // This is where we would call: 
-                // const result = await processEyelash(currentImage, selectedEyelash, adjustmentParams);
-                
-                // For demo purposes, we'll just show a success message
-                setTimeout(() => {
-                    resultCanvas.width = currentImage.width;
-                    resultCanvas.height = currentImage.height;
-                    const ctx = resultCanvas.getContext('2d');
-                    ctx.drawImage(currentImage, 0, 0);
-                    
-                    // Draw a simple representation of eyelashes for demo
-                    ctx.strokeStyle = '#8a6dcc';
-                    ctx.lineWidth = 3;
-                    
-                    // Draw left eyelash
-                    ctx.beginPath();
-                    ctx.moveTo(currentImage.width * 0.3, currentImage.height * 0.4);
-                    for (let i = 0; i < 10; i++) {
-                        ctx.lineTo(
-                            currentImage.width * (0.3 - 0.02 * i), 
-                            currentImage.height * (0.4 - 0.02 * i)
-                        );
-                    }
-                    ctx.stroke();
-                    
-                    // Draw right eyelash
-                    ctx.beginPath();
-                    ctx.moveTo(currentImage.width * 0.7, currentImage.height * 0.4);
-                    for (let i = 0; i < 10; i++) {
-                        ctx.lineTo(
-                            currentImage.width * (0.7 + 0.02 * i), 
-                            currentImage.height * (0.4 - 0.02 * i)
-                        );
-                    }
-                    ctx.stroke();
-                    
-                    showImage(resultCanvas);
-                    
-                    applyEyelashBtn.disabled = false;
-                    applyEyelashBtn.innerHTML = '<i class="fas fa-check"></i> Apply Eyelash';
-                    
-                    alert(`Applied ${selectedEyelash} eyelash with your adjustments!`);
-                }, 1500);
-                
-            } catch (error) {
-                console.error('Error applying eyelash:', error);
-                alert('Error applying eyelash. Please try again.');
-                applyEyelashBtn.disabled = false;
-                applyEyelashBtn.innerHTML = '<i class="fas fa-check"></i> Apply Eyelash';
-            }
-        }
-        
-        async function analyzeEyes() {
-            if (!currentImage) {
-                alert('Please upload or capture an image first.');
-                return;
-            }
-            
-            try {
-                // Show loading state
-                analyzeText.classList.add('hidden');
-                analyzeLoading.classList.remove('hidden');
-                analyzeBtn.disabled = true;
-                
-                // In a real implementation, this would call the analyzeAndRecommend function
-                // from the eyelash-system.js file
-                // const result = await recommender.analyzeAndRecommend(currentImage);
-                
-                // For demo purposes, we'll simulate the analysis with sample data
-                setTimeout(() => {
-                    // Sample analysis results
-                    const sampleAnalysis = {
-                        classification: {
-                            eye_shape: "Almond",
-                            eye_size: "Medium",
-                            eye_spacing: "Average-set"
-                        },
-                        measurements: {
-                            eye_aspect_ratio: 0.42,
-                            eye_angle: 2.5,
-                            lid_visibility: 0.45,
-                            inter_eye_ratio: 1.05,
-                            eye_width_to_face_ratio: 0.16,
-                            symmetry_score: 0.92
-                        },
-                        recommendations: {
-                            top_picks: [
-                                {
-                                    name: "Iconic",
-                                    category: "Doll Eye Styles",
-                                    style_type: "Universal Doll Eye",
-                                    description: "Classic doll eye - works for everyone",
-                                    intensity: "Medium-Heavy",
-                                    look: "Versatile",
-                                    match_score: 95
-                                },
-                                {
-                                    name: "Drunk In Love",
-                                    category: "Cat Eye Styles",
-                                    style_type: "Subtle Cat Eye",
-                                    description: "Soft cat eye effect for everyday glamour",
-                                    intensity: "Medium",
-                                    look: "Glam",
-                                    match_score: 88
-                                },
-                                {
-                                    name: "Foxy",
-                                    category: "Cat Eye Styles",
-                                    style_type: "Elongating & Dramatic",
-                                    description: "Perfect cat eye with outer corner emphasis",
-                                    intensity: "Medium",
-                                    look: "Soft Glam",
-                                    match_score: 85
-                                }
-                            ],
-                            all_suitable: [
-                                // This would contain all suitable products
-                            ],
-                            application_tip: "Apply evenly across entire lash line for balanced look",
-                            shape_tip: "Lucky you! Your almond eyes are versatile and can rock any lash style - go bold!",
-                            total_matches: 7
-                        }
-                    };
-                    
-                    displayAnalysisResults(sampleAnalysis);
-                    
-                    // Hide loading state
-                    analyzeText.classList.remove('hidden');
-                    analyzeLoading.classList.add('hidden');
-                    analyzeBtn.disabled = false;
-                }, 2000);
-                
-            } catch (error) {
-                console.error('Error analyzing eyes:', error);
-                alert('Error analyzing eyes. Please try again.');
-                
-                // Hide loading state
-                analyzeText.classList.remove('hidden');
-                analyzeLoading.classList.add('hidden');
-                analyzeBtn.disabled = false;
-            }
-        }
-        
-        function displayAnalysisResults(results) {
-            // Display analysis results
-            analysisResults.classList.remove('hidden');
-            analysisResults.innerHTML = `
-                <div class="analysis-item">
-                    <div class="analysis-label">Eye Shape</div>
-                    <div class="analysis-value">${results.classification.eye_shape}</div>
-                </div>
-                <div class="analysis-item">
-                    <div class="analysis-label">Eye Size</div>
-                    <div class="analysis-value">${results.classification.eye_size}</div>
-                </div>
-                <div class="analysis-item">
-                    <div class="analysis-label">Eye Spacing</div>
-                    <div class="analysis-value">${results.classification.eye_spacing}</div>
-                </div>
-                <div class="analysis-item">
-                    <div class="analysis-label">Symmetry Score</div>
-                    <div class="analysis-value">${results.measurements.symmetry_score}</div>
-                </div>
-            `;
-            
-            // Display recommendations
-            recommendationResults.classList.remove('hidden');
-            let recommendationsHTML = '<h3 style="margin-bottom: 15px;">Top Recommendations</h3>';
-            
-            results.recommendations.top_picks.forEach((product, index) => {
-                const matchPercentage = product.match_score;
-                recommendationsHTML += `
-                    <div class="recommendation-card">
-                        <div class="recommendation-header">
-                            <div class="recommendation-name">${product.name}</div>
-                            <div class="recommendation-category">${product.category}</div>
-                        </div>
-                        <p>${product.description}</p>
-                        <div class="recommendation-details">
-                            <div class="detail-item">
-                                <div class="detail-label">Style</div>
-                                <div class="detail-value">${product.style_type}</div>
-                            </div>
-                            <div class="detail-item">
-                                <div class="detail-label">Intensity</div>
-                                <div class="detail-value">${product.intensity}</div>
-                            </div>
-                            <div class="detail-item">
-                                <div class="detail-label">Look</div>
-                                <div class="detail-value">${product.look}</div>
-                            </div>
-                            <div class="detail-item">
-                                <div class="detail-label">Match Score</div>
-                                <div class="match-score">
-                                    <span>${matchPercentage}%</span>
-                                    <div class="score-bar">
-                                        <div class="score-fill" style="width: ${matchPercentage}%"></div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                `;
-            });
-            
-            // Add tips
-            recommendationsHTML += `
-                <div class="tips-section">
-                    <div class="tip-title">Application Tip</div>
-                    <p>${results.recommendations.application_tip}</p>
-                </div>
-                <div class="tips-section">
-                    <div class="tip-title">Shape-Specific Advice</div>
-                    <p>${results.recommendations.shape_tip}</p>
-                </div>
-            `;
-            
-            recommendationResults.innerHTML = recommendationsHTML;
-        }
-        
-        // Initialize
-        resetAdjustments();
-    </script>
     
-    <!-- Font Awesome for icons -->
-    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
-</body>
-</html>
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-content">
+            <div class="spinner"></div>
+            <h3>Processing...</h3>
+            <p>Please wait while we analyze your image</p>
+        </div>
+    </div>
+
+<script>
+// ---------- CONSTANTS ----------
+const LEFT_EYE_UPPER = [246, 161, 160, 159, 158, 157, 173, 133, 155, 154, 153, 145, 144, 163, 7];
+const RIGHT_EYE_UPPER = [466, 388, 387, 386, 385, 384, 398, 362, 382, 381, 380, 374, 373, 390, 249];
+
+const LEFT_EYE_INNER = 133;
+const LEFT_EYE_OUTER = 33;
+const RIGHT_EYE_INNER = 362;
+const RIGHT_EYE_OUTER = 263;
+
+const EYELASH_NAMES = {
+    "Drunk In Love": "Drunk In Love",
+    "Wedding Day": "Wedding Day",
+    "Foxy": "Foxy",
+    "Flare": "Flare",
+    "Vixen": "Vixen",
+    "Other Half 1": "Other Half 1",
+    "Other Half 2": "Other Half 2",
+    "Staycation": "Staycation",
+    "Iconic": "Iconic"
+};
+
+// ---------- EYELASH RECOMMENDATION SYSTEM ----------
+class EyelashRecommendationSystem {
+    constructor() {
+        this.faceMeshModel = null;
+        
+        // Eye landmarks indices
+        this.RIGHT_EYE = [33, 133, 160, 159, 158, 157, 173, 155, 154, 153, 145, 144, 163, 7];
+        this.LEFT_EYE = [263, 362, 387, 386, 385, 384, 398, 382, 381, 380, 374, 373, 390, 249];
+        
+        // Key points for measurements
+        this.RIGHT_EYE_INNER = 133;
+        this.RIGHT_EYE_OUTER = 33;
+        this.LEFT_EYE_INNER = 362;
+        this.LEFT_EYE_OUTER = 263;
+        
+        // Inventory with detailed specifications
+        this.inventory = {
+            "Cat Eye Styles": {
+                "Foxy": {
+                    "suitable_sizes": ["Small", "Medium", "Large"],
+                    "suitable_shapes": ["Almond", "Round", "Upturned"],
+                    "style_type": "Elongating & Dramatic",
+                    "description": "Perfect cat eye with outer corner emphasis",
+                    "intensity": "Medium",
+                    "look": "Soft Glam"
+                },
+                "Drunk In Love": {
+                    "suitable_sizes": ["Small", "Medium"],
+                    "suitable_shapes": ["Almond", "Round", "Upturned", "Downturned"],
+                    "style_type": "Subtle Cat Eye",
+                    "description": "Soft cat eye effect for everyday glamour",
+                    "intensity": "Medium",
+                    "look": "Glam"
+                },
+                "Other Half 2": {
+                    "suitable_sizes": ["Small"],
+                    "suitable_shapes": ["Almond", "Round", "Upturned", "Hooded"],
+                    "style_type": "Delicate Cat Eye",
+                    "description": "Lightweight cat eye for smaller eyes",
+                    "intensity": "Medium",
+                    "look": "Lifted"
+                },
+                "Vixen": {
+                    "suitable_sizes": ["Large"],
+                    "suitable_shapes": ["Almond", "Round", "Upturned"],
+                    "style_type": "Bold Cat Eye",
+                    "description": "Dramatic cat eye for larger eyes",
+                    "intensity": "Heavy",
+                    "look": "Dramatic"
+                }
+            },
+            "Doll Eye Styles": {
+                "Iconic": {
+                    "suitable_sizes": ["Small", "Medium", "Large"],
+                    "suitable_shapes": ["Round", "Almond", "Upturned", "Downturned", "Hooded"],
+                    "style_type": "Universal Doll Eye",
+                    "description": "Classic doll eye - works for everyone",
+                    "intensity": "Medium-Heavy",
+                    "look": "Versatile"
+                },
+                "Wedding Day": {
+                    "suitable_sizes": ["Small", "Medium"],
+                    "suitable_shapes": ["Round", "Almond", "Upturned", "Downturned", "Hooded"],
+                    "style_type": "Romantic Doll Eye",
+                    "description": "Soft, romantic doll effect",
+                    "intensity": "Medium",
+                    "look": "Versatile"
+                },
+                "Staycation": {
+                    "suitable_sizes": ["Large"],
+                    "suitable_shapes": ["Round", "Almond", "Upturned"],
+                    "style_type": "Voluminous Doll Eye",
+                    "description": "Full, dramatic doll eye for larger eyes",
+                    "intensity": "Heavy",
+                    "look": "Dramatic"
+                }
+            },
+            "Natural Styles": {
+                "Flare": {
+                    "suitable_sizes": ["Small", "Medium"],
+                    "suitable_shapes": ["Almond", "Upturned", "Downturned", "Round"],
+                    "style_type": "Natural with Subtle Flare",
+                    "description": "Natural look with gentle outer corner lift",
+                    "intensity": "Natural",
+                    "look": "Natural"
+                },
+                "Other Half 1": {
+                    "suitable_sizes": ["Small"],
+                    "suitable_shapes": ["Hooded"],
+                    "style_type": "Natural for Hooded Eyes",
+                    "description": "Specially designed for small hooded eyes",
+                    "intensity": "Natural",
+                    "look": "Natural"
+                }
+            }
+        };
+    }
+    
+    async loadModel() {
+        if (!this.faceMeshModel) {
+            this.faceMeshModel = await faceLandmarksDetection.load(
+                faceLandmarksDetection.SupportedPackages.mediapipeFacemesh,
+                { maxFaces: 1 }
+            );
+        }
+        return this.faceMeshModel;
+    }
+    
+    calculateDistance(point1, point2) {
+        return Math.sqrt(
+            Math.pow(point1[0] - point2[0], 2) + 
+            Math.pow(point1[1] - point2[1], 2)
+        );
+    }
+    
+    getEyeMeasurements(landmarks, imgWidth, imgHeight) {
+        const measurements = {};
+        
+        // Convert landmarks to pixel coordinates
+        const rightEyeInner = [
+            landmarks[this.RIGHT_EYE_INNER][0] * imgWidth,
+            landmarks[this.RIGHT_EYE_INNER][1] * imgHeight
+        ];
+        const rightEyeOuter = [
+            landmarks[this.RIGHT_EYE_OUTER][0] * imgWidth,
+            landmarks[this.RIGHT_EYE_OUTER][1] * imgHeight
+        ];
+        const leftEyeInner = [
+            landmarks[this.LEFT_EYE_INNER][0] * imgWidth,
+            landmarks[this.LEFT_EYE_INNER][1] * imgHeight
+        ];
+        const leftEyeOuter = [
+            landmarks[this.LEFT_EYE_OUTER][0] * imgWidth,
+            landmarks[this.LEFT_EYE_OUTER][1] * imgHeight
+        ];
+        
+        // Right eye measurements
+        const rightEyeTop = [landmarks[159][0] * imgWidth, landmarks[159][1] * imgHeight];
+        const rightEyeBottom = [landmarks[145][0] * imgWidth, landmarks[145][1] * imgHeight];
+        const rightEyeTop2 = [landmarks[160][0] * imgWidth, landmarks[160][1] * imgHeight];
+        const rightEyeBottom2 = [landmarks[144][0] * imgWidth, landmarks[144][1] * imgHeight];
+        
+        // Left eye measurements
+        const leftEyeTop = [landmarks[386][0] * imgWidth, landmarks[386][1] * imgHeight];
+        const leftEyeBottom = [landmarks[374][0] * imgWidth, landmarks[374][1] * imgHeight];
+        const leftEyeTop2 = [landmarks[387][0] * imgWidth, landmarks[387][1] * imgHeight];
+        const leftEyeBottom2 = [landmarks[373][0] * imgWidth, landmarks[373][1] * imgHeight];
+        
+        // Calculate absolute measurements
+        const rightEyeWidth = this.calculateDistance(rightEyeInner, rightEyeOuter);
+        const leftEyeWidth = this.calculateDistance(leftEyeInner, leftEyeOuter);
+        
+        const rightEyeHeight1 = this.calculateDistance(rightEyeTop, rightEyeBottom);
+        const rightEyeHeight2 = this.calculateDistance(rightEyeTop2, rightEyeBottom2);
+        const rightEyeHeight = (rightEyeHeight1 + rightEyeHeight2) / 2;
+        
+        const leftEyeHeight1 = this.calculateDistance(leftEyeTop, leftEyeBottom);
+        const leftEyeHeight2 = this.calculateDistance(leftEyeTop2, leftEyeBottom2);
+        const leftEyeHeight = (leftEyeHeight1 + leftEyeHeight2) / 2;
+        
+        // Inter-eye distance
+        const interEyeDistance = this.calculateDistance(rightEyeInner, leftEyeInner);
+        
+        // Face width (for relative measurements)
+        const faceLeft = [landmarks[234][0] * imgWidth, landmarks[234][1] * imgHeight];
+        const faceRight = [landmarks[454][0] * imgWidth, landmarks[454][1] * imgHeight];
+        const faceWidth = this.calculateDistance(faceLeft, faceRight);
+        
+        // Calculate RELATIVE measurements (scale-invariant)
+        const avgEyeWidth = (rightEyeWidth + leftEyeWidth) / 2;
+        
+        measurements.right_eye_width_relative = rightEyeWidth / faceWidth;
+        measurements.left_eye_width_relative = leftEyeWidth / faceWidth;
+        measurements.avg_eye_width_relative = avgEyeWidth / faceWidth;
+        
+        // Eye Aspect Ratio (height/width) - naturally relative
+        measurements.right_ear = rightEyeHeight / rightEyeWidth;
+        measurements.left_ear = leftEyeHeight / leftEyeWidth;
+        measurements.avg_ear = (measurements.right_ear + measurements.left_ear) / 2;
+        
+        // Inter-eye distance relative to eye width
+        measurements.inter_eye_ratio = interEyeDistance / avgEyeWidth;
+        
+        // Calculate eye angles (upturned vs downturned)
+        const rightAngle = Math.atan2(
+            rightEyeOuter[1] - rightEyeInner[1],
+            rightEyeOuter[0] - rightEyeInner[0]
+        ) * (180 / Math.PI);
+        
+        const leftAngle = Math.atan2(
+            leftEyeInner[1] - leftEyeOuter[1],
+            leftEyeInner[0] - leftEyeOuter[0]
+        ) * (180 / Math.PI);
+        
+        measurements.right_eye_angle = rightAngle;
+        measurements.left_eye_angle = leftAngle;
+        measurements.avg_eye_angle = (rightAngle + leftAngle) / 2;
+        
+        // Eyelid visibility (hooded detection)
+        const rightCrease = [landmarks[157][0] * imgWidth, landmarks[157][1] * imgHeight];
+        const leftCrease = [landmarks[384][0] * imgWidth, landmarks[384][1] * imgHeight];
+        
+        const rightLidVisibility = this.calculateDistance(rightCrease, rightEyeTop) / rightEyeHeight;
+        const leftLidVisibility = this.calculateDistance(leftCrease, leftEyeTop) / leftEyeHeight;
+        
+        measurements.right_lid_visibility = rightLidVisibility;
+        measurements.left_lid_visibility = leftLidVisibility;
+        measurements.avg_lid_visibility = (rightLidVisibility + leftLidVisibility) / 2;
+        
+        // Symmetry score
+        measurements.symmetry_score = 1 - Math.abs(rightEyeWidth - leftEyeWidth) / avgEyeWidth;
+        
+        return measurements;
+    }
+    
+    classifyEyeShape(measurements) {
+        const ear = measurements.avg_ear;
+        const angle = measurements.avg_eye_angle;
+        const lidVisibility = measurements.avg_lid_visibility;
+        
+        // Eye shape classification
+        if (lidVisibility < 0.3) {
+            return "Hooded";
+        } else if (ear > 0.5) {
+            return "Round";
+        } else if (ear < 0.35) {
+            if (angle > 2) {
+                return "Upturned";
+            } else if (angle < -2) {
+                return "Downturned";
+            } else {
+                return "Almond";
+            }
+        } else {
+            if (angle > 3) {
+                return "Upturned";
+            } else if (angle < -3) {
+                return "Downturned";
+            } else {
+                return "Almond";
+            }
+        }
+    }
+    
+    classifyEyeSize(measurements) {
+        const eyeWidthRatio = measurements.avg_eye_width_relative;
+        
+        if (eyeWidthRatio < 0.15) {
+            return "Small";
+        } else if (eyeWidthRatio > 0.18) {
+            return "Large";
+        } else {
+            return "Medium";
+        }
+    }
+    
+    classifyEyeSpacing(measurements) {
+        const interEyeRatio = measurements.inter_eye_ratio;
+        
+        if (interEyeRatio < 0.95) {
+            return "Close-set";
+        } else if (interEyeRatio > 1.15) {
+            return "Wide-set";
+        } else {
+            return "Average-set";
+        }
+    }
+    
+    calculateMatchScore(shape, size, spacing, productDetails) {
+        let score = 100;
+        
+        // Perfect match for hooded eyes with specific products
+        if (shape === "Hooded" && productDetails.suitable_shapes.includes("Hooded")) {
+            score += 50;
+        }
+        
+        // Prioritize universal products
+        if (productDetails.suitable_sizes.length === 3) {  // Universal size
+            score += 10;
+        }
+        if (productDetails.suitable_shapes.length >= 4) {  // Works with many shapes
+            score += 10;
+        }
+        
+        // Cat eye styles work best for elongation
+        if (["Round", "Downturned"].includes(shape) && productDetails.style_type.includes("Cat Eye")) {
+            score += 20;
+        }
+        
+        // Doll eye styles work best for round enhancement
+        if (["Almond", "Upturned"].includes(shape) && productDetails.style_type.includes("Doll Eye")) {
+            score += 15;
+        }
+        
+        // Natural styles for subtle looks
+        if (size === "Small" && productDetails.style_type.includes("Natural")) {
+            score += 15;
+        }
+        
+        return score;
+    }
+    
+    recommendEyelashes(shape, size, spacing) {
+        const recommendedProducts = [];
+        
+        for (const [category, products] of Object.entries(this.inventory)) {
+            for (const [productName, details] of Object.entries(products)) {
+                // Check if product matches eye size and shape
+                const sizeMatch = details.suitable_sizes.includes(size);
+                const shapeMatch = details.suitable_shapes.includes(shape);
+                
+                if (sizeMatch && shapeMatch) {
+                    recommendedProducts.push({
+                        name: productName,
+                        category: category,
+                        style_type: details.style_type,
+                        description: details.description,
+                        intensity: details.intensity,
+                        look: details.look,
+                        match_score: this.calculateMatchScore(shape, size, spacing, details)
+                    });
+                }
+            }
+        }
+        
+        // Sort by match score
+        recommendedProducts.sort((a, b) => b.match_score - a.match_score);
+        
+        // Get top 3 recommendations
+        const topRecommendations = recommendedProducts.slice(0, 3);
+        
+        // Spacing-based application tips
+        const spacingTips = {
+            "Close-set": "Focus application on outer 2/3 of lash line to create width",
+            "Wide-set": "Focus application on inner 2/3 of lash line to bring eyes closer",
+            "Average-set": "Apply evenly across entire lash line for balanced look"
+        };
+        
+        // Shape-based tips
+        const shapeTips = {
+            "Hooded": "Your hooded eyes look best with curled, wispy lashes that lift and open the eye. Avoid heavy styles.",
+            "Round": "Elongate your beautiful round eyes with cat-eye styles that emphasize the outer corners.",
+            "Almond": "Lucky you! Your almond eyes are versatile and can rock any lash style - go bold!",
+            "Downturned": "Lift your eye shape with curled lashes that have extra volume at the outer corners.",
+            "Upturned": "Balance your naturally lifted eyes with even length across the lash line."
+        };
+        
+        return {
+            top_picks: topRecommendations,
+            all_suitable: recommendedProducts,
+            application_tip: spacingTips[spacing] || "",
+            shape_tip: shapeTips[shape] || "",
+            total_matches: recommendedProducts.length
+        };
+    }
+    
+    async analyzeAndRecommend(imageElement) {
+        await this.loadModel();
+        
+        const predictions = await this.faceMeshModel.estimateFaces({
+            input: imageElement,
+            returnTensors: false,
+            flipHorizontal: false,
+            predictIrises: true
+        });
+        
+        if (!predictions || predictions.length === 0) {
+            throw new Error("No face detected in image");
+        }
+        
+        const landmarks = predictions[0].scaledMesh;
+        const imgWidth = imageElement.width;
+        const imgHeight = imageElement.height;
+        
+        // Get measurements
+        const measurements = this.getEyeMeasurements(landmarks, imgWidth, imgHeight);
+        
+        // Classify eyes
+        const eyeShape = this.classifyEyeShape(measurements);
+        const eyeSize = this.classifyEyeSize(measurements);
+        const eyeSpacing = this.classifyEyeSpacing(measurements);
+        
+        // Get recommendations
+        const recommendations = this.recommendEyelashes(eyeShape, eyeSize, eyeSpacing);
+        
+        return {
+            classification: {
+                eye_shape: eyeShape,
+                eye_size: eyeSize,
+                eye_spacing: eyeSpacing
+            },
+            measurements: {
+                eye_aspect_ratio: parseFloat(measurements.avg_ear.toFixed(3)),
+                eye_angle: parseFloat(measurements.avg_eye_angle.toFixed(2)),
+                lid_visibility: parseFloat(measurements.avg_lid_visibility.toFixed(3)),
+                inter_eye_ratio: parseFloat(measurements.inter_eye_ratio.toFixed(3)),
+                eye_width_to_face_ratio: parseFloat(measurements.avg_eye_width_relative.toFixed(3)),
+                symmetry_score: parseFloat(measurements.symmetry_score.toFixed(3))
+            },
+            recommendations: recommendations
+        };
+    }
+}
+
+// ---------- EYELASH TRY-ON SYSTEM ----------
+class EyelashTryOnSystem {
+    constructor() {
+        this.faceMeshModel = null;
+    }
+    
+    async loadModel() {
+        if (!this.faceMeshModel) {
+            this.faceMeshModel = await faceLandmarksDetection.load(
+                faceLandmarksDetection.SupportedPackages.mediapipeFacemesh,
+                { maxFaces: 1 }
+            );
+        }
+        return this.faceMeshModel;
+    }
+    
+    rotateCanvas(canvas, angle) {
+        if (angle === 0) return canvas;
+        
+        const tempCanvas = document.createElement('canvas');
+        const tempCtx = tempCanvas.getContext('2d');
+        
+        const rad = angle * Math.PI / 180;
+        const cos = Math.abs(Math.cos(rad));
+        const sin = Math.abs(Math.sin(rad));
+        
+        const newWidth = Math.floor(canvas.width * cos + canvas.height * sin);
+        const newHeight = Math.floor(canvas.width * sin + canvas.height * cos);
+        
+        tempCanvas.width = newWidth;
+        tempCanvas.height = newHeight;
+        
+        tempCtx.translate(newWidth / 2, newHeight / 2);
+        tempCtx.rotate(rad);
+        tempCtx.drawImage(canvas, -canvas.width / 2, -canvas.height / 2);
+        
+        return tempCanvas;
+    }
+    
+    overlayTransparentImage(backgroundCanvas, overlayCanvas, x, y, width, height, rotationAngle = 0) {
+        const ctx = backgroundCanvas.getContext('2d');
+        
+        // Create a temporary canvas for the overlay
+        const tempCanvas = document.createElement('canvas');
+        const tempCtx = tempCanvas.getContext('2d');
+        tempCanvas.width = width;
+        tempCanvas.height = height;
+        
+        // Draw resized overlay
+        tempCtx.drawImage(overlayCanvas, 0, 0, width, height);
+        
+        // Apply rotation if specified
+        let finalCanvas = tempCanvas;
+        let finalX = x;
+        let finalY = y;
+        
+        if (rotationAngle !== 0) {
+            finalCanvas = this.rotateCanvas(tempCanvas, rotationAngle);
+            
+            // Adjust position to keep center at same location
+            const newWidth = finalCanvas.width;
+            const newHeight = finalCanvas.height;
+            
+            finalX = x - (newWidth - width) / 2;
+            finalY = y - (newHeight - height) / 2;
+        }
+        
+        // Draw on background
+        ctx.drawImage(finalCanvas, finalX, finalY);
+    }
+    
+    getEyeRegionInfo(landmarks, eyeUpperIndices, innerIdx, outerIdx, imgWidth, imgHeight) {
+        const upperPoints = eyeUpperIndices.map(i => [
+            landmarks[i][0] * imgWidth,
+            landmarks[i][1] * imgHeight
+        ]);
+        
+        const inner = [landmarks[innerIdx][0] * imgWidth, landmarks[innerIdx][1] * imgHeight];
+        const outer = [landmarks[outerIdx][0] * imgWidth, landmarks[outerIdx][1] * imgHeight];
+        
+        const eyeWidth = Math.sqrt(
+            Math.pow(outer[0] - inner[0], 2) + 
+            Math.pow(outer[1] - inner[1], 2)
+        );
+        
+        const centerX = (inner[0] + outer[0]) / 2;
+        const centerY = upperPoints.reduce((sum, p) => sum + p[1], 0) / upperPoints.length;
+        
+        return {
+            center_x: Math.floor(centerX),
+            center_y: Math.floor(centerY),
+            width: Math.floor(eyeWidth)
+        };
+    }
+    
+    async processEyelash(imageElement, eyelashImage, options = {}) {
+        const {
+            vertical_offset = -10,
+            horizontal_offset = 0,
+            size_scale = 2.0,
+            height_scale = 1.0,
+            rotation_angle = 0
+        } = options;
+        
+        await this.loadModel();
+        
+        const predictions = await this.faceMeshModel.estimateFaces({
+            input: imageElement,
+            returnTensors: false,
+            flipHorizontal: false,
+            predictIrises: true
+        });
+        
+        if (!predictions || predictions.length === 0) {
+            throw new Error("No face detected");
+        }
+        
+        const landmarks = predictions[0].scaledMesh;
+        const imgWidth = imageElement.width;
+        const imgHeight = imageElement.height;
+        
+        // Create output canvas
+        const outputCanvas = document.createElement('canvas');
+        outputCanvas.width = imgWidth;
+        outputCanvas.height = imgHeight;
+        const ctx = outputCanvas.getContext('2d');
+        
+        // Draw original image
+        ctx.drawImage(imageElement, 0, 0);
+        
+        // Get eye regions
+        const leftInfo = this.getEyeRegionInfo(landmarks, LEFT_EYE_UPPER, LEFT_EYE_INNER, LEFT_EYE_OUTER, imgWidth, imgHeight);
+        const rightInfo = this.getEyeRegionInfo(landmarks, RIGHT_EYE_UPPER, RIGHT_EYE_INNER, RIGHT_EYE_OUTER, imgWidth, imgHeight);
+        
+        const lashAspect = eyelashImage.width / eyelashImage.height;
+        
+        // LEFT EYE
+        const lw = Math.floor(leftInfo.width * size_scale);
+        const lh = Math.floor((lw / lashAspect) * height_scale);
+        const lx = leftInfo.center_x - lw / 2 + horizontal_offset;
+        const ly = leftInfo.center_y + vertical_offset - lh / 2;
+        
+        // RIGHT EYE (negative rotation for mirrored eye)
+        const rw = Math.floor(rightInfo.width * size_scale);
+        const rh = Math.floor((rw / lashAspect) * height_scale);
+        const rx = rightInfo.center_x - rw / 2 - horizontal_offset;
+        const ry = rightInfo.center_y + vertical_offset - rh / 2;
+        
+        // Create canvas for eyelash
+        const eyelashCanvas = document.createElement('canvas');
+        eyelashCanvas.width = eyelashImage.width;
+        eyelashCanvas.height = eyelashImage.height;
+        const eyelashCtx = eyelashCanvas.getContext('2d');
+        eyelashCtx.drawImage(eyelashImage, 0, 0);
+        
+        // Create flipped version
+        const flippedCanvas = document.createElement('canvas');
+        flippedCanvas.width = eyelashImage.width;
+        flippedCanvas.height = eyelashImage.height;
+        const flippedCtx = flippedCanvas.getContext('2d');
+        flippedCtx.translate(eyelashImage.width, 0);
+        flippedCtx.scale(-1, 1);
+        flippedCtx.drawImage(eyelashImage, 0, 0);
+        
+        // Apply eyelashes with rotation
+        this.overlayTransparentImage(outputCanvas, eyelashCanvas, rx, ry, rw, rh, -rotation_angle);
+        this.overlayTransparentImage(outputCanvas, flippedCanvas, lx, ly, lw, lh, rotation_angle);
+        
+        return outputCanvas;
+    }
+}
+
+// ---------- UTILITY FUNCTIONS ----------
+function loadImageFromFile(file) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            const img = new Image();
+            img.onload = () => resolve(img);
+            img.onerror = reject;
+            img.src = e.target.result;
+        };
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+    });
+}
+
+function loadImageFromPath(path) {
+    return new Promise((resolve, reject) => {
+        const img = new Image();
+        img.onload = () => resolve(img);
+        img.onerror = reject;
+        img.src = path;
+    });
+}
+
+function canvasToBlob(canvas, type = 'image/jpeg', quality = 0.95) {
+    return new Promise((resolve) => {
+        canvas.toBlob(resolve, type, quality);
+    });
+}
+
+// ---------- EXPORTS ----------
+const recommender = new EyelashRecommendationSystem();
+const tryOnSystem = new EyelashTryOnSystem();
+
+// Export for use in HTML
+if (typeof module !== 'undefined' && module.exports) {
+    module.exports = {
+        EyelashRecommendationSystem,
+        EyelashTryOnSystem,
+        recommender,
+        tryOnSystem,
+        loadImageFromFile,
+        loadImageFromPath,
+        canvasToBlob,
+        EYELASH_NAMES
+    };
+}
+</script>
