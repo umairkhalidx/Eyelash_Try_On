@@ -21,48 +21,52 @@
         
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: #f5f5f5;
             min-height: 100vh;
             padding: 20px;
+            color: #333;
         }
         
         .container {
             max-width: 1400px;
             margin: 0 auto;
             background: white;
-            border-radius: 20px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
             overflow: hidden;
         }
         
         .header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 30px;
+            background: white;
+            color: #333;
+            padding: 25px 30px;
             text-align: center;
+            border-bottom: 1px solid #eaeaea;
         }
         
         .header h1 {
-            font-size: 2.5em;
-            margin-bottom: 10px;
+            font-size: 2.2em;
+            margin-bottom: 8px;
+            font-weight: 600;
         }
         
         .header p {
-            font-size: 1.1em;
-            opacity: 0.9;
+            font-size: 1em;
+            color: #666;
         }
         
         .main-content {
             display: grid;
             grid-template-columns: 1fr 2fr 1fr;
             gap: 20px;
-            padding: 30px;
+            padding: 25px;
         }
         
         .sidebar {
-            background: #f8f9fa;
-            border-radius: 15px;
+            background: #fafafa;
+            border-radius: 10px;
             padding: 20px;
+            border: 1px solid #eaeaea;
         }
         
         .center-panel {
@@ -72,14 +76,15 @@
         }
         
         .image-container {
-            background: #f8f9fa;
-            border-radius: 15px;
+            background: #fafafa;
+            border-radius: 10px;
             padding: 20px;
             display: flex;
             align-items: center;
             justify-content: center;
             min-height: 500px;
             position: relative;
+            border: 1px solid #eaeaea;
         }
         
         .video-wrapper {
@@ -90,7 +95,7 @@
         #video, #imagePreview {
             max-width: 100%;
             max-height: 500px;
-            border-radius: 10px;
+            border-radius: 8px;
             display: none;
         }
         
@@ -100,7 +105,7 @@
         
         .face-guide {
             position: absolute;
-            border: 3px dashed #ffd700;
+            border: 3px dashed #ccc;
             border-radius: 50%;
             pointer-events: none;
             width: 300px;
@@ -112,76 +117,69 @@
         
         .upload-prompt {
             text-align: center;
-            color: #666;
+            color: #888;
         }
         
         .upload-prompt svg {
-            width: 100px;
-            height: 100px;
-            margin-bottom: 20px;
-            opacity: 0.3;
+            width: 80px;
+            height: 80px;
+            margin-bottom: 15px;
+            opacity: 0.4;
         }
         
         .section-title {
-            font-size: 1.3em;
+            font-size: 1.2em;
             font-weight: 600;
             margin-bottom: 15px;
             color: #333;
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 8px;
+        }
+        
+        .section-title.small {
+            font-size: 1em;
+            margin-bottom: 10px;
         }
         
         .btn {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: #4a5568;
             color: white;
             border: none;
-            padding: 12px 24px;
-            border-radius: 8px;
+            padding: 10px 20px;
+            border-radius: 6px;
             cursor: pointer;
-            font-size: 1em;
-            font-weight: 600;
-            transition: all 0.3s;
+            font-size: 0.95em;
+            font-weight: 500;
+            transition: all 0.2s;
             width: 100%;
             margin-bottom: 10px;
         }
         
         .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+            background: #2d3748;
         }
         
         .btn:disabled {
             opacity: 0.5;
             cursor: not-allowed;
-            transform: none;
         }
         
         .btn-secondary {
-            background: #6c757d;
+            background: #718096;
         }
         
         .btn-success {
-            background: #28a745;
+            background: #38a169;
         }
         
         .btn-danger {
-            background: #dc3545;
+            background: #e53e3e;
         }
         
         .btn-small {
             padding: 8px 16px;
             font-size: 0.9em;
-        }
-        
-        .btn-control {
-            width: 40px;
-            height: 40px;
-            padding: 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.2em;
         }
         
         input[type="file"] {
@@ -191,99 +189,112 @@
         .eyelash-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
-            gap: 10px;
+            gap: 12px;
             max-height: 400px;
             overflow-y: auto;
+            padding: 5px;
         }
         
         .eyelash-option {
             background: white;
-            border: 2px solid #e0e0e0;
+            border: 1px solid #e2e8f0;
             border-radius: 8px;
             padding: 12px;
             cursor: pointer;
-            transition: all 0.3s;
+            transition: all 0.2s;
             text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
         
         .eyelash-option:hover {
-            border-color: #667eea;
-            transform: scale(1.05);
+            border-color: #cbd5e0;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
         }
         
         .eyelash-option.selected {
-            border-color: #667eea;
-            background: #f0f4ff;
+            border-color: #4a5568;
+            background: #f7fafc;
         }
         
         .eyelash-option h4 {
-            font-size: 0.95em;
+            font-size: 0.9em;
             margin-bottom: 5px;
             color: #333;
+            margin-top: 8px;
         }
         
-        .eyelash-option img {
-            width: 100%;
-            height: 80px;
-            object-fit: contain;
-            margin-bottom: 8px;
+        .eyelash-image {
+            width: 60px;
+            height: 30px;
+            background: #f1f1f1;
             border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8em;
+            color: #888;
         }
         
         .recommendations-section {
-            margin-top: 30px;
+            margin-top: 20px;
         }
         
-        .recommendations-grid {
+        .recommendation-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            gap: 15px;
+            gap: 12px;
             margin-bottom: 20px;
         }
         
-        .recommendation-item {
+        .recommendation-card {
             background: white;
-            border-radius: 10px;
-            padding: 15px;
-            text-align: center;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-        }
-        
-        .recommendation-item img {
-            width: 100%;
-            height: 120px;
-            object-fit: contain;
-            margin-bottom: 10px;
-            border-radius: 6px;
-        }
-        
-        .all-lashes-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 15px;
-            margin-top: 15px;
-        }
-        
-        .all-lashes-item {
-            background: white;
+            border: 1px solid #e2e8f0;
             border-radius: 8px;
-            padding: 10px;
+            padding: 12px;
             text-align: center;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
         
-        .all-lashes-item img {
-            width: 100%;
-            height: 80px;
-            object-fit: contain;
-            margin-bottom: 8px;
-            border-radius: 4px;
+        .recommendation-card h4 {
+            font-size: 0.9em;
+            margin-bottom: 5px;
+            color: #333;
+            margin-top: 8px;
+        }
+        
+        .collection-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+        }
+        
+        .collection-card {
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 12px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .collection-card h4 {
+            font-size: 0.9em;
+            margin-bottom: 5px;
+            color: #333;
+            margin-top: 8px;
         }
         
         .controls-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 15px;
+            gap: 12px;
             margin-bottom: 15px;
         }
         
@@ -291,34 +302,49 @@
             background: white;
             padding: 15px;
             border-radius: 8px;
-            border: 1px solid #e0e0e0;
+            border: 1px solid #e2e8f0;
         }
         
         .control-group label {
             display: block;
             font-weight: 600;
-            margin-bottom: 8px;
-            color: #555;
-            font-size: 0.9em;
-        }
-        
-        .control-group input[type="range"] {
-            width: 100%;
-            margin-bottom: 5px;
-        }
-        
-        .control-value {
-            text-align: center;
-            font-weight: 600;
-            color: #667eea;
+            margin-bottom: 10px;
+            color: #4a5568;
             font-size: 0.9em;
         }
         
         .control-buttons {
             display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .control-btn {
+            background: #edf2f7;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
             justify-content: center;
-            gap: 10px;
-            margin-top: 10px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 1.1em;
+            transition: all 0.2s;
+        }
+        
+        .control-btn:hover {
+            background: #e2e8f0;
+        }
+        
+        .control-value {
+            text-align: center;
+            font-weight: 600;
+            color: #4a5568;
+            font-size: 0.95em;
+            min-width: 40px;
         }
         
         .action-buttons {
@@ -332,23 +358,23 @@
             border-radius: 8px;
             padding: 15px;
             margin-top: 15px;
-            border: 2px solid #e0e0e0;
+            border: 1px solid #e2e8f0;
         }
         
-        .recommendation-card {
-            background: #f8f9fa;
+        .recommendation-card-large {
+            background: #f7fafc;
             padding: 15px;
             border-radius: 8px;
             margin-bottom: 10px;
-            border-left: 4px solid #667eea;
+            border-left: 4px solid #4a5568;
         }
         
-        .recommendation-card h4 {
-            color: #667eea;
+        .recommendation-card-large h4 {
+            color: #4a5568;
             margin-bottom: 8px;
         }
         
-        .recommendation-card p {
+        .recommendation-card-large p {
             color: #666;
             font-size: 0.9em;
             margin: 5px 0;
@@ -365,17 +391,17 @@
         }
         
         .badge-primary {
-            background: #667eea;
+            background: #4a5568;
             color: white;
         }
         
         .badge-success {
-            background: #28a745;
+            background: #38a169;
             color: white;
         }
         
         .badge-info {
-            background: #17a2b8;
+            background: #3182ce;
             color: white;
         }
         
@@ -405,7 +431,7 @@
         
         .spinner {
             border: 4px solid #f3f3f3;
-            border-top: 4px solid #667eea;
+            border-top: 4px solid #4a5568;
             border-radius: 50%;
             width: 50px;
             height: 50px;
@@ -425,21 +451,21 @@
         }
         
         .alert-info {
-            background: #d1ecf1;
-            color: #0c5460;
-            border: 1px solid #bee5eb;
+            background: #ebf8ff;
+            color: #2b6cb0;
+            border: 1px solid #bee3f8;
         }
         
         .alert-success {
-            background: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
+            background: #f0fff4;
+            color: #276749;
+            border: 1px solid #c6f6d5;
         }
         
         .alert-danger {
-            background: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
+            background: #fff5f5;
+            color: #c53030;
+            border: 1px solid #fed7d7;
         }
         
         .classification-info {
@@ -447,10 +473,11 @@
             padding: 15px;
             border-radius: 8px;
             margin-bottom: 15px;
+            border: 1px solid #e2e8f0;
         }
         
         .classification-info h4 {
-            color: #667eea;
+            color: #4a5568;
             margin-bottom: 10px;
         }
         
@@ -458,7 +485,7 @@
             display: flex;
             justify-content: space-between;
             padding: 8px 0;
-            border-bottom: 1px solid #e0e0e0;
+            border-bottom: 1px solid #e2e8f0;
         }
         
         .info-row:last-child {
@@ -467,17 +494,17 @@
         
         .info-label {
             font-weight: 600;
-            color: #555;
+            color: #4a5568;
         }
         
         .info-value {
-            color: #667eea;
+            color: #2d3748;
             font-weight: 600;
         }
         
         canvas {
             max-width: 100%;
-            border-radius: 10px;
+            border-radius: 8px;
         }
         
         @media (max-width: 1200px) {
@@ -489,22 +516,16 @@
                 grid-template-columns: 1fr;
             }
             
-            .recommendations-grid {
+            .recommendation-grid,
+            .collection-grid {
                 grid-template-columns: repeat(2, 1fr);
-            }
-            
-            .all-lashes-grid {
-                grid-template-columns: repeat(3, 1fr);
             }
         }
         
         @media (max-width: 768px) {
-            .recommendations-grid {
+            .recommendation-grid,
+            .collection-grid {
                 grid-template-columns: 1fr;
-            }
-            
-            .all-lashes-grid {
-                grid-template-columns: repeat(2, 1fr);
             }
         }
     </style>
@@ -512,7 +533,7 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>✨ Eyelash Try-On & Recommendation System</h1>
+            <h1>Eyelash Try-On & Recommendation System</h1>
             <p>Upload a photo or use your camera to try on eyelashes and get personalized recommendations</p>
         </div>
         
@@ -541,17 +562,17 @@
                 </button>
                 
                 <div id="cameraStatus" class="alert alert-info" style="display: none; margin-top: 15px;">
-                    Position your face inside the yellow guide
+                    Position your face inside the guide
                 </div>
                 
-                <hr style="margin: 20px 0; border: none; border-top: 1px solid #ddd;">
+                <hr style="margin: 20px 0; border: none; border-top: 1px solid #e2e8f0;">
                 
                 <div class="section-title">
-                    💄 All Lashes Collection
+                    💄 Select Eyelash Style
                 </div>
                 
-                <div class="all-lashes-grid" id="allLashesGrid">
-                    <!-- All eyelash options will be populated here -->
+                <div class="eyelash-grid" id="eyelashGrid">
+                    <!-- Eyelash options will be populated here -->
                 </div>
             </div>
             
@@ -587,27 +608,27 @@
                     </button>
                 </div>
                 
-                <!-- Top Recommendations Section -->
-                <div class="recommendations-section" id="recommendationsSection" style="display: none;">
+                <!-- Recommendations Section -->
+                <div class="recommendations-section">
                     <div class="section-title">
-                        💎 Top 3 Recommended Lashes
+                        Top 3 Recommended Lashes
                     </div>
                     
-                    <div class="recommendations-grid" id="recommendationsGrid">
-                        <!-- Top 3 recommendations will appear here -->
+                    <div class="recommendation-grid" id="topRecommendations">
+                        <!-- Top recommendations will be populated here -->
                     </div>
                     
                     <div class="section-title">
-                        🎯 Your Eye Analysis
+                        All Lashes Collection
                     </div>
                     
-                    <div class="classification-info" id="classificationInfo">
-                        <!-- Classification results will appear here -->
+                    <div class="collection-grid" id="allLashesCollection">
+                        <!-- All lashes will be populated here -->
                     </div>
                 </div>
             </div>
             
-            <!-- Right Sidebar - Controls & Adjustments -->
+            <!-- Right Sidebar - Controls & Recommendations -->
             <div class="sidebar">
                 <div class="section-title">
                     🎛️ Adjust Position
@@ -616,46 +637,46 @@
                 <div class="controls-grid">
                     <div class="control-group">
                         <label>Vertical Position</label>
-                        <div class="control-value" id="verticalValue">-10</div>
                         <div class="control-buttons">
-                            <button class="btn btn-control" id="verticalUp">↑</button>
-                            <button class="btn btn-control" id="verticalDown">↓</button>
+                            <div class="control-btn" id="verticalDown">-</div>
+                            <div class="control-value" id="verticalValue">-10</div>
+                            <div class="control-btn" id="verticalUp">+</div>
                         </div>
                     </div>
                     
                     <div class="control-group">
                         <label>Horizontal Position</label>
-                        <div class="control-value" id="horizontalValue">0</div>
                         <div class="control-buttons">
-                            <button class="btn btn-control" id="horizontalLeft">←</button>
-                            <button class="btn btn-control" id="horizontalRight">→</button>
+                            <div class="control-btn" id="horizontalLeft">←</div>
+                            <div class="control-value" id="horizontalValue">0</div>
+                            <div class="control-btn" id="horizontalRight">→</div>
                         </div>
                     </div>
                     
                     <div class="control-group">
                         <label>Size Scale</label>
-                        <div class="control-value" id="sizeValue">2.0</div>
                         <div class="control-buttons">
-                            <button class="btn btn-control" id="sizeMinus">-</button>
-                            <button class="btn btn-control" id="sizePlus">+</button>
+                            <div class="control-btn" id="sizeDown">-</div>
+                            <div class="control-value" id="sizeValue">2.0</div>
+                            <div class="control-btn" id="sizeUp">+</div>
                         </div>
                     </div>
                     
                     <div class="control-group">
                         <label>Height Scale</label>
-                        <div class="control-value" id="heightValue">1.0</div>
                         <div class="control-buttons">
-                            <button class="btn btn-control" id="heightMinus">-</button>
-                            <button class="btn btn-control" id="heightPlus">+</button>
+                            <div class="control-btn" id="heightDown">-</div>
+                            <div class="control-value" id="heightValue">1.0</div>
+                            <div class="control-btn" id="heightUp">+</div>
                         </div>
                     </div>
                     
                     <div class="control-group" style="grid-column: 1 / -1;">
                         <label>Rotation Angle</label>
-                        <div class="control-value" id="rotationValue">0°</div>
                         <div class="control-buttons">
-                            <button class="btn btn-control" id="rotationLeft">↺</button>
-                            <button class="btn btn-control" id="rotationRight">↻</button>
+                            <div class="control-btn" id="rotationLeft">↶</div>
+                            <div class="control-value" id="rotationValue">0°</div>
+                            <div class="control-btn" id="rotationRight">↷</div>
                         </div>
                     </div>
                 </div>
@@ -667,6 +688,26 @@
                 <button class="btn btn-secondary btn-small" id="resetControls">
                     Reset to Default
                 </button>
+                
+                <hr style="margin: 20px 0; border: none; border-top: 1px solid #e2e8f0;">
+                
+                <div id="recommendationsSection" style="display: none;">
+                    <div class="section-title">
+                        🎯 Your Eye Analysis
+                    </div>
+                    
+                    <div class="classification-info" id="classificationInfo">
+                        <!-- Classification results will appear here -->
+                    </div>
+                    
+                    <div class="section-title">
+                        💎 Top Recommendations
+                    </div>
+                    
+                    <div id="recommendationsContainer">
+                        <!-- Recommendations will appear here -->
+                    </div>
+                </div>
             </div>
         </div>
     </div>
