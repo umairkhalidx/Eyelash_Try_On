@@ -174,16 +174,6 @@
             font-size: 0.9em;
         }
         
-        .btn-control {
-            width: 40px;
-            height: 40px;
-            padding: 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.2em;
-        }
-        
         input[type="file"] {
             display: none;
         }
@@ -222,64 +212,6 @@
             color: #333;
         }
         
-        .eyelash-option img {
-            width: 100%;
-            height: 80px;
-            object-fit: contain;
-            margin-bottom: 8px;
-            border-radius: 4px;
-        }
-        
-        .recommendations-section {
-            margin-top: 30px;
-        }
-        
-        .recommendations-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 15px;
-            margin-bottom: 20px;
-        }
-        
-        .recommendation-item {
-            background: white;
-            border-radius: 10px;
-            padding: 15px;
-            text-align: center;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-        }
-        
-        .recommendation-item img {
-            width: 100%;
-            height: 120px;
-            object-fit: contain;
-            margin-bottom: 10px;
-            border-radius: 6px;
-        }
-        
-        .all-lashes-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 15px;
-            margin-top: 15px;
-        }
-        
-        .all-lashes-item {
-            background: white;
-            border-radius: 8px;
-            padding: 10px;
-            text-align: center;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-        }
-        
-        .all-lashes-item img {
-            width: 100%;
-            height: 80px;
-            object-fit: contain;
-            margin-bottom: 8px;
-            border-radius: 4px;
-        }
-        
         .controls-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -312,13 +244,6 @@
             font-weight: 600;
             color: #667eea;
             font-size: 0.9em;
-        }
-        
-        .control-buttons {
-            display: flex;
-            justify-content: center;
-            gap: 10px;
-            margin-top: 10px;
         }
         
         .action-buttons {
@@ -488,24 +413,6 @@
             .controls-grid {
                 grid-template-columns: 1fr;
             }
-            
-            .recommendations-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
-            
-            .all-lashes-grid {
-                grid-template-columns: repeat(3, 1fr);
-            }
-        }
-        
-        @media (max-width: 768px) {
-            .recommendations-grid {
-                grid-template-columns: 1fr;
-            }
-            
-            .all-lashes-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
         }
     </style>
 </head>
@@ -547,11 +454,11 @@
                 <hr style="margin: 20px 0; border: none; border-top: 1px solid #ddd;">
                 
                 <div class="section-title">
-                    💄 All Lashes Collection
+                    💄 Select Eyelash Style
                 </div>
                 
-                <div class="all-lashes-grid" id="allLashesGrid">
-                    <!-- All eyelash options will be populated here -->
+                <div class="eyelash-grid" id="eyelashGrid">
+                    <!-- Eyelash options will be populated here -->
                 </div>
             </div>
             
@@ -586,28 +493,9 @@
                         🔄 Reset
                     </button>
                 </div>
-                
-                <!-- Top Recommendations Section -->
-                <div class="recommendations-section" id="recommendationsSection" style="display: none;">
-                    <div class="section-title">
-                        💎 Top 3 Recommended Lashes
-                    </div>
-                    
-                    <div class="recommendations-grid" id="recommendationsGrid">
-                        <!-- Top 3 recommendations will appear here -->
-                    </div>
-                    
-                    <div class="section-title">
-                        🎯 Your Eye Analysis
-                    </div>
-                    
-                    <div class="classification-info" id="classificationInfo">
-                        <!-- Classification results will appear here -->
-                    </div>
-                </div>
             </div>
             
-            <!-- Right Sidebar - Controls & Adjustments -->
+            <!-- Right Sidebar - Controls & Recommendations -->
             <div class="sidebar">
                 <div class="section-title">
                     🎛️ Adjust Position
@@ -616,47 +504,32 @@
                 <div class="controls-grid">
                     <div class="control-group">
                         <label>Vertical Position</label>
+                        <input type="range" id="verticalOffset" min="-50" max="50" value="-10" step="1">
                         <div class="control-value" id="verticalValue">-10</div>
-                        <div class="control-buttons">
-                            <button class="btn btn-control" id="verticalUp">↑</button>
-                            <button class="btn btn-control" id="verticalDown">↓</button>
-                        </div>
                     </div>
                     
                     <div class="control-group">
                         <label>Horizontal Position</label>
+                        <input type="range" id="horizontalOffset" min="-50" max="50" value="0" step="1">
                         <div class="control-value" id="horizontalValue">0</div>
-                        <div class="control-buttons">
-                            <button class="btn btn-control" id="horizontalLeft">←</button>
-                            <button class="btn btn-control" id="horizontalRight">→</button>
-                        </div>
                     </div>
                     
                     <div class="control-group">
                         <label>Size Scale</label>
+                        <input type="range" id="sizeScale" min="0.5" max="3.0" value="2.0" step="0.1">
                         <div class="control-value" id="sizeValue">2.0</div>
-                        <div class="control-buttons">
-                            <button class="btn btn-control" id="sizeMinus">-</button>
-                            <button class="btn btn-control" id="sizePlus">+</button>
-                        </div>
                     </div>
                     
                     <div class="control-group">
                         <label>Height Scale</label>
+                        <input type="range" id="heightScale" min="0.5" max="2.0" value="1.0" step="0.1">
                         <div class="control-value" id="heightValue">1.0</div>
-                        <div class="control-buttons">
-                            <button class="btn btn-control" id="heightMinus">-</button>
-                            <button class="btn btn-control" id="heightPlus">+</button>
-                        </div>
                     </div>
                     
                     <div class="control-group" style="grid-column: 1 / -1;">
                         <label>Rotation Angle</label>
+                        <input type="range" id="rotationAngle" min="-45" max="45" value="0" step="1">
                         <div class="control-value" id="rotationValue">0°</div>
-                        <div class="control-buttons">
-                            <button class="btn btn-control" id="rotationLeft">↺</button>
-                            <button class="btn btn-control" id="rotationRight">↻</button>
-                        </div>
                     </div>
                 </div>
                 
@@ -667,6 +540,26 @@
                 <button class="btn btn-secondary btn-small" id="resetControls">
                     Reset to Default
                 </button>
+                
+                <hr style="margin: 20px 0; border: none; border-top: 1px solid #ddd;">
+                
+                <div id="recommendationsSection" style="display: none;">
+                    <div class="section-title">
+                        🎯 Your Eye Analysis
+                    </div>
+                    
+                    <div class="classification-info" id="classificationInfo">
+                        <!-- Classification results will appear here -->
+                    </div>
+                    
+                    <div class="section-title">
+                        💎 Top Recommendations
+                    </div>
+                    
+                    <div id="recommendationsContainer">
+                        <!-- Recommendations will appear here -->
+                    </div>
+                </div>
             </div>
         </div>
     </div>
