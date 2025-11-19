@@ -6,8 +6,11 @@
     <title>Eyelash Try-On & Recommendation System</title>
     
     <!-- TensorFlow.js and Face Landmarks Detection -->
-    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/face-landmarks-detection"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-core"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-converter"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-backend-webgl"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/face-landmarks-detection@1.0.2"></script>
     
     <style>
         * {
@@ -689,9 +692,13 @@
             
             async loadModel() {
                 if (!this.faceMeshModel) {
-                    this.faceMeshModel = await faceLandmarksDetection.load(
-                        faceLandmarksDetection.SupportedPackages.mediapipeFacemesh,
-                        { maxFaces: 1 }
+                    this.faceMeshModel = await faceLandmarksDetection.createDetector(
+                        faceLandmarksDetection.SupportedModels.MediaPipeFaceMesh,
+                        {
+                            runtime: 'mediapipe',
+                            solutionPath: 'https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh',
+                            maxFaces: 1
+                        }
                     );
                 }
                 return this.faceMeshModel;
@@ -708,31 +715,31 @@
                 const measurements = {};
                 
                 const rightEyeInner = [
-                    landmarks[this.RIGHT_EYE_INNER][0] * imgWidth,
-                    landmarks[this.RIGHT_EYE_INNER][1] * imgHeight
+                    landmarks[this.RIGHT_EYE_INNER].x,
+                    landmarks[this.RIGHT_EYE_INNER].y
                 ];
                 const rightEyeOuter = [
-                    landmarks[this.RIGHT_EYE_OUTER][0] * imgWidth,
-                    landmarks[this.RIGHT_EYE_OUTER][1] * imgHeight
+                    landmarks[this.RIGHT_EYE_OUTER].x,
+                    landmarks[this.RIGHT_EYE_OUTER].y
                 ];
                 const leftEyeInner = [
-                    landmarks[this.LEFT_EYE_INNER][0] * imgWidth,
-                    landmarks[this.LEFT_EYE_INNER][1] * imgHeight
+                    landmarks[this.LEFT_EYE_INNER].x,
+                    landmarks[this.LEFT_EYE_INNER].y
                 ];
                 const leftEyeOuter = [
-                    landmarks[this.LEFT_EYE_OUTER][0] * imgWidth,
-                    landmarks[this.LEFT_EYE_OUTER][1] * imgHeight
+                    landmarks[this.LEFT_EYE_OUTER].x,
+                    landmarks[this.LEFT_EYE_OUTER].y
                 ];
                 
-                const rightEyeTop = [landmarks[159][0] * imgWidth, landmarks[159][1] * imgHeight];
-                const rightEyeBottom = [landmarks[145][0] * imgWidth, landmarks[145][1] * imgHeight];
-                const rightEyeTop2 = [landmarks[160][0] * imgWidth, landmarks[160][1] * imgHeight];
-                const rightEyeBottom2 = [landmarks[144][0] * imgWidth, landmarks[144][1] * imgHeight];
+                const rightEyeTop = [landmarks[159].x, landmarks[159].y];
+                const rightEyeBottom = [landmarks[145].x, landmarks[145].y];
+                const rightEyeTop2 = [landmarks[160].x, landmarks[160].y];
+                const rightEyeBottom2 = [landmarks[144].x, landmarks[144].y];
                 
-                const leftEyeTop = [landmarks[386][0] * imgWidth, landmarks[386][1] * imgHeight];
-                const leftEyeBottom = [landmarks[374][0] * imgWidth, landmarks[374][1] * imgHeight];
-                const leftEyeTop2 = [landmarks[387][0] * imgWidth, landmarks[387][1] * imgHeight];
-                const leftEyeBottom2 = [landmarks[373][0] * imgWidth, landmarks[373][1] * imgHeight];
+                const leftEyeTop = [landmarks[386].x, landmarks[386].y];
+                const leftEyeBottom = [landmarks[374].x, landmarks[374].y];
+                const leftEyeTop2 = [landmarks[387].x, landmarks[387].y];
+                const leftEyeBottom2 = [landmarks[373].x, landmarks[373].y];
                 
                 const rightEyeWidth = this.calculateDistance(rightEyeInner, rightEyeOuter);
                 const leftEyeWidth = this.calculateDistance(leftEyeInner, leftEyeOuter);
@@ -747,8 +754,8 @@
                 
                 const interEyeDistance = this.calculateDistance(rightEyeInner, leftEyeInner);
                 
-                const faceLeft = [landmarks[234][0] * imgWidth, landmarks[234][1] * imgHeight];
-                const faceRight = [landmarks[454][0] * imgWidth, landmarks[454][1] * imgHeight];
+                const faceLeft = [landmarks[234].x, landmarks[234].y];
+                const faceRight = [landmarks[454].x, landmarks[454].y];
                 const faceWidth = this.calculateDistance(faceLeft, faceRight);
                 
                 const avgEyeWidth = (rightEyeWidth + leftEyeWidth) / 2;
@@ -777,8 +784,8 @@
                 measurements.left_eye_angle = leftAngle;
                 measurements.avg_eye_angle = (rightAngle + leftAngle) / 2;
                 
-                const rightCrease = [landmarks[157][0] * imgWidth, landmarks[157][1] * imgHeight];
-                const leftCrease = [landmarks[384][0] * imgWidth, landmarks[384][1] * imgHeight];
+                const rightCrease = [landmarks[157].x, landmarks[157].y];
+                const leftCrease = [landmarks[384].x, landmarks[384].y];
                 
                 const rightLidVisibility = this.calculateDistance(rightCrease, rightEyeTop) / rightEyeHeight;
                 const leftLidVisibility = this.calculateDistance(leftCrease, leftEyeTop) / leftEyeHeight;
@@ -925,18 +932,13 @@
             async analyzeAndRecommend(imageElement) {
                 await this.loadModel();
                 
-                const predictions = await this.faceMeshModel.estimateFaces({
-                    input: imageElement,
-                    returnTensors: false,
-                    flipHorizontal: false,
-                    predictIrises: true
-                });
+                const predictions = await this.faceMeshModel.estimateFaces(imageElement);
                 
                 if (!predictions || predictions.length === 0) {
                     throw new Error("No face detected in image");
                 }
                 
-                const landmarks = predictions[0].scaledMesh;
+                const landmarks = predictions[0].keypoints;
                 const imgWidth = imageElement.width;
                 const imgHeight = imageElement.height;
                 
@@ -975,9 +977,13 @@
             
             async loadModel() {
                 if (!this.faceMeshModel) {
-                    this.faceMeshModel = await faceLandmarksDetection.load(
-                        faceLandmarksDetection.SupportedPackages.mediapipeFacemesh,
-                        { maxFaces: 1 }
+                    this.faceMeshModel = await faceLandmarksDetection.createDetector(
+                        faceLandmarksDetection.SupportedModels.MediaPipeFaceMesh,
+                        {
+                            runtime: 'mediapipe',
+                            solutionPath: 'https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh',
+                            maxFaces: 1
+                        }
                     );
                 }
                 return this.faceMeshModel;
@@ -1035,12 +1041,12 @@
             
             getEyeRegionInfo(landmarks, eyeUpperIndices, innerIdx, outerIdx, imgWidth, imgHeight) {
                 const upperPoints = eyeUpperIndices.map(i => [
-                    landmarks[i][0] * imgWidth,
-                    landmarks[i][1] * imgHeight
+                    landmarks[i].x,
+                    landmarks[i].y
                 ]);
                 
-                const inner = [landmarks[innerIdx][0] * imgWidth, landmarks[innerIdx][1] * imgHeight];
-                const outer = [landmarks[outerIdx][0] * imgWidth, landmarks[outerIdx][1] * imgHeight];
+                const inner = [landmarks[innerIdx].x, landmarks[innerIdx].y];
+                const outer = [landmarks[outerIdx].x, landmarks[outerIdx].y];
                 
                 const eyeWidth = Math.sqrt(
                     Math.pow(outer[0] - inner[0], 2) + 
@@ -1068,18 +1074,13 @@
                 
                 await this.loadModel();
                 
-                const predictions = await this.faceMeshModel.estimateFaces({
-                    input: imageElement,
-                    returnTensors: false,
-                    flipHorizontal: false,
-                    predictIrises: true
-                });
+                const predictions = await this.faceMeshModel.estimateFaces(imageElement);
                 
                 if (!predictions || predictions.length === 0) {
                     throw new Error("No face detected");
                 }
                 
-                const landmarks = predictions[0].scaledMesh;
+                const landmarks = predictions[0].keypoints;
                 const imgWidth = imageElement.width;
                 const imgHeight = imageElement.height;
                 
