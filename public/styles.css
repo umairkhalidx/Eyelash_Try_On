@@ -1,1013 +1,620 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Eyelash Try-On & Recommendation System</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
-            background: #ffffff;
-            color: #333;
-        }
-
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-
-        .main-layout {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 40px;
-            margin-top: 20px;
-        }
-
-        /* Left Panel - Image Display */
-        .left-panel {
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-        }
-
-        .image-display {
-            background: #f8f9fa;
-            border-radius: 8px;
-            min-height: 500px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .upload-section {
-            text-align: center;
-            padding: 20px;
-        }
-
-        .model-photo img {
-            max-width: 100%;
-            max-height: 400px;
-            border-radius: 8px;
-        }
-
-        .upload-controls {
-            display: flex;
-            gap: 10px;
-            justify-content: center;
-            margin: 20px 0;
-        }
-
-        .control-btn {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            padding: 12px 24px;
-            background: #fff;
-            border: 2px solid #ddd;
-            border-radius: 25px;
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: 500;
-            transition: all 0.3s;
-        }
-
-        .control-btn:hover {
-            border-color: #666;
-            background: #f8f9fa;
-        }
-
-        .control-btn svg {
-            width: 20px;
-            height: 20px;
-        }
-
-        .upload-message {
-            color: #666;
-            font-size: 14px;
-            margin-top: 10px;
-        }
-
-        /* Video Container */
-        .video-container {
-            position: relative;
-            width: 100%;
-            height: 100%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        #video {
-            max-width: 100%;
-            max-height: 500px;
-            border-radius: 8px;
-        }
-
-        .face-guide-box {
-            position: absolute;
-            border: 3px solid #FFD700;
-            width: 280px;
-            height: 360px;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            pointer-events: none;
-            border-radius: 4px;
-        }
-
-        .capture-btn {
-            position: absolute;
-            bottom: 30px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            border: 4px solid #fff;
-            background: #007bff;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.3s;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-        }
-
-        .capture-btn:hover {
-            transform: translateX(-50%) scale(1.1);
-        }
-
-        .capture-btn svg {
-            fill: #fff;
-        }
-
-        /* Image Container */
-        .image-container {
-            width: 100%;
-            height: 100%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        #imagePreview, #resultCanvas {
-            max-width: 100%;
-            max-height: 500px;
-            border-radius: 8px;
-        }
-
-        /* Adjustment Controls */
-        .adjustment-controls {
-            background: #fff;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .control-row {
-            display: flex;
-            gap: 10px;
-            align-items: center;
-        }
-
-        .adj-btn {
-            width: 40px;
-            height: 40px;
-            border: 2px solid #ddd;
-            background: #fff;
-            border-radius: 4px;
-            font-size: 18px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: all 0.3s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .adj-btn:hover {
-            border-color: #333;
-            background: #f8f9fa;
-        }
-
-        .adj-btn:active {
-            transform: scale(0.95);
-        }
-
-        .scale-value {
-            min-width: 40px;
-            text-align: center;
-            font-weight: bold;
-            color: #333;
-        }
-
-        /* Right Panel */
-        .right-panel {
-            display: flex;
-            flex-direction: column;
-        }
-
-        .mode-selection {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
-
-        .mode-selection h2 {
-            font-size: 24px;
-            margin-bottom: 10px;
-        }
-
-        .mode-btn {
-            padding: 20px;
-            background: #fff;
-            border: 2px solid #ddd;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: all 0.3s;
-            text-align: left;
-        }
-
-        .mode-btn:hover {
-            border-color: #007bff;
-            box-shadow: 0 4px 12px rgba(0,123,255,0.1);
-        }
-
-        .mode-btn span {
-            display: block;
-            font-size: 18px;
-            font-weight: 600;
-            margin-bottom: 5px;
-        }
-
-        .mode-btn small {
-            color: #666;
-            font-size: 14px;
-        }
-
-        /* Try-On Content */
-        .try-on-content h2,
-        .recommend-content h2 {
-            font-size: 24px;
-            margin-bottom: 20px;
-        }
-
-        .lashes-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-            gap: 15px;
-            max-height: 600px;
-            overflow-y: auto;
-            padding: 10px;
-        }
-
-        .lash-card {
-            background: #fff;
-            border: 2px solid #ddd;
-            border-radius: 8px;
-            padding: 10px;
-            cursor: pointer;
-            transition: all 0.3s;
-            text-align: center;
-        }
-
-        .lash-card:hover {
-            border-color: #007bff;
-            box-shadow: 0 4px 12px rgba(0,123,255,0.1);
-            transform: translateY(-2px);
-        }
-
-        .lash-card.selected {
-            border-color: #007bff;
-            background: #f0f8ff;
-        }
-
-        .lash-card.recommended {
-            border-color: #FFD700;
-            background: #fffef0;
-        }
-
-        .lash-card img {
-            width: 100%;
-            height: 60px;
-            object-fit: contain;
-            margin-bottom: 8px;
-        }
-
-        .lash-card p {
-            font-size: 12px;
-            font-weight: 500;
-            color: #333;
-            word-break: break-word;
-        }
-
-        /* Recommendation Content */
-        .recommend-btn {
-            padding: 16px 32px;
-            background: #007bff;
-            color: #fff;
-            border: none;
-            border-radius: 8px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
-            margin-bottom: 20px;
-        }
-
-        .recommend-btn:hover {
-            background: #0056b3;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0,123,255,0.3);
-        }
-
-        .recommendations-section h3 {
-            font-size: 20px;
-            margin: 20px 0 15px;
-        }
-
-        .top-picks {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 15px;
-            margin-bottom: 30px;
-        }
-
-        .analysis-info {
-            background: #f8f9fa;
-            border-radius: 8px;
-            padding: 20px;
-            margin-top: 20px;
-        }
-
-        .analysis-info h4 {
-            font-size: 18px;
-            margin-bottom: 15px;
-        }
-
-        .info-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-            margin-bottom: 15px;
-        }
-
-        .info-item {
-            display: flex;
-            justify-content: space-between;
-            padding: 10px;
-            background: #fff;
-            border-radius: 4px;
-        }
-
-        .info-item .label {
-            font-weight: 500;
-            color: #666;
-        }
-
-        .info-item .value {
-            font-weight: 600;
-            color: #007bff;
-        }
-
-        .tip {
-            background: #e7f3ff;
-            padding: 12px;
-            border-radius: 4px;
-            margin-top: 10px;
-            font-size: 14px;
-            color: #333;
-            border-left: 4px solid #007bff;
-        }
-
-        /* Loading Overlay */
-        .loading-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.7);
-            display: none;
-            align-items: center;
-            justify-content: center;
-            z-index: 1000;
-            flex-direction: column;
-            gap: 15px;
-        }
-
-        .spinner {
-            width: 50px;
-            height: 50px;
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid #007bff;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        .loading-overlay p {
-            color: #fff;
-            font-size: 16px;
-        }
-
-        /* Scrollbar Styling */
-        .lashes-grid::-webkit-scrollbar {
-            width: 8px;
-        }
-
-        .lashes-grid::-webkit-scrollbar-track {
-            background: #f1f1f1;
-            border-radius: 4px;
-        }
-
-        .lashes-grid::-webkit-scrollbar-thumb {
-            background: #888;
-            border-radius: 4px;
-        }
-
-        .lashes-grid::-webkit-scrollbar-thumb:hover {
-            background: #555;
-        }
-
-        /* Responsive Design */
-        @media (max-width: 1024px) {
-            .main-layout {
-                grid-template-columns: 1fr;
-            }
-
-            .top-picks {
-                grid-template-columns: repeat(3, 1fr);
-            }
-        }
-
-        @media (max-width: 768px) {
-            .lashes-grid {
-                grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
-                gap: 10px;
-            }
-
-            .top-picks {
-                grid-template-columns: 1fr;
-            }
-
-            .info-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .control-row {
-                flex-wrap: wrap;
-            }
-        }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <!-- Main Layout -->
-        <div class="main-layout">
-            <!-- Left Panel - Image Display -->
-            <div class="left-panel">
-                <div class="image-display" id="imageDisplay">
-                    <!-- Initial Upload Prompt -->
-                    <div class="upload-section" id="uploadSection">
-                        <div class="model-photo">
-                            <img src="placeholder-model.jpg" alt="Model" id="placeholderImg">
-                        </div>
-                        <div class="upload-controls">
-                            <button class="control-btn" id="uploadBtn">
-                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/>
-                                </svg>
-                                Upload
-                            </button>
-                            <button class="control-btn" id="cameraBtn">
-                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/>
-                                    <circle cx="12" cy="13" r="4"/>
-                                </svg>
-                                Camera
-                            </button>
-                            <input type="file" id="fileInput" accept="image/*" style="display: none;">
-                        </div>
-                        <p class="upload-message">Try-on ready! You can adjust or rotate now.</p>
-                    </div>
-
-                    <!-- Video Display -->
-                    <div class="video-container" id="videoContainer" style="display: none;">
-                        <video id="video" autoplay playsinline></video>
-                        <div class="face-guide-box"></div>
-                        <button class="capture-btn" id="captureBtn">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
-                                <circle cx="12" cy="12" r="10"/>
-                            </svg>
-                        </button>
-                    </div>
-
-                    <!-- Image Preview -->
-                    <div class="image-container" id="imageContainer" style="display: none;">
-                        <img id="imagePreview" alt="Preview">
-                        <canvas id="resultCanvas"></canvas>
-                    </div>
-                </div>
-
-                <!-- Adjustment Controls (shown after try-on) -->
-                <div class="adjustment-controls" id="adjustmentControls" style="display: none;">
-                    <div class="control-row">
-                        <button class="adj-btn" id="upBtn">↑</button>
-                    </div>
-                    <div class="control-row">
-                        <button class="adj-btn" id="leftBtn">←</button>
-                        <button class="adj-btn" id="downBtn">↓</button>
-                        <button class="adj-btn" id="rightBtn">→</button>
-                    </div>
-                    <div class="control-row">
-                        <button class="adj-btn" id="minusBtn">−</button>
-                        <span class="scale-value" id="scaleValue">2.5</span>
-                        <button class="adj-btn" id="plusBtn">+</button>
-                    </div>
-                    <div class="control-row">
-                        <button class="adj-btn" id="rotateLeftBtn">↶</button>
-                        <button class="adj-btn" id="rotateRightBtn">↷</button>
-                        <button class="adj-btn" id="resetBtn">⟲</button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Right Panel - Options -->
-            <div class="right-panel">
-                <!-- Mode Selection (Initial) -->
-                <div class="mode-selection" id="modeSelection">
-                    <h2>Choose Mode</h2>
-                    <button class="mode-btn" id="tryOnModeBtn">
-                        <span>✨ Try-On Mode</span>
-                        <small>Select and apply eyelashes</small>
-                    </button>
-                    <button class="mode-btn" id="recommendModeBtn">
-                        <span>🎯 Recommendation Mode</span>
-                        <small>Get personalized suggestions</small>
-                    </button>
-                </div>
-
-                <!-- Try-On Mode Content -->
-                <div class="try-on-content" id="tryOnContent" style="display: none;">
-                    <h2>All Lashes Collection</h2>
-                    <div class="lashes-grid" id="lashesGrid">
-                        <!-- Lashes will be populated here -->
-                    </div>
-                </div>
-
-                <!-- Recommendation Mode Content -->
-                <div class="recommend-content" id="recommendContent" style="display: none;">
-                    <h2>Get Recommendations</h2>
-                    <button class="recommend-btn" id="analyzeBtn">
-                        🎯 Analyze My Eyes
-                    </button>
-                    
-                    <div class="recommendations-section" id="recommendationsSection" style="display: none;">
-                        <h3>Top 3 Recommended Lashes</h3>
-                        <div class="top-picks" id="topPicks">
-                            <!-- Top recommendations will appear here -->
-                        </div>
-                        
-                        <h3>All Lashes Collection</h3>
-                        <div class="lashes-grid" id="allLashesGrid">
-                            <!-- All lashes will appear here -->
-                        </div>
-                        
-                        <div class="analysis-info" id="analysisInfo">
-                            <!-- Eye analysis info will appear here -->
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Loading Overlay -->
-    <div class="loading-overlay" id="loadingOverlay">
-        <div class="spinner"></div>
-        <p>Processing...</p>
-    </div>
-
-    <!-- Include external JS -->
-    <script src="eyelash-system.js"></script>
-    <script>
-        // Application State
-        let currentImage = null;
-        let selectedEyelash = null;
-        let currentMode = null;
-        let stream = null;
-        let eyelashImages = {};
-        
-        // Adjustment values
-        let adjustments = {
-            vertical: -10,
-            horizontal: 0,
-            scale: 2.0,
-            height: 1.0,
-            rotation: 0
-        };
-
-        // Initialize systems
-        const recommender = new EyelashRecommendationSystem();
-        const tryOnSystem = new EyelashTryOnSystem();
-
-        // Eyelash data with image paths
-        const EYELASHES = {
-            "test": { name: "test", image: "eyelashes/test.png" },
-            "PerfectCorp": { name: "PerfectCorp", image: "eyelashes/PerfectCorp.png" },
-            "Drunk in Love": { name: "Drunk in Love", image: "eyelashes/Drunk In Love.png" },
-            "Foxy": { name: "Foxy", image: "eyelashes/Foxy.png" },
-            "Iconic": { name: "Iconic", image: "eyelashes/Iconic.png" },
-            "Other Half 2": { name: "Other Half 2", image: "eyelashes/Other Half 2.png" },
-            "Other Half 1": { name: "Other Half 1", image: "eyelashes/Other Half 1.png" },
-            "Staycation": { name: "Staycation", image: "eyelashes/Staycation.png" },
-            "Vixen": { name: "Vixen", image: "eyelashes/Vixen.png" },
-            "Wedding Day": { name: "Wedding Day", image: "eyelashes/Wedding Day.png" }
-        };
-
-        // DOM Elements
-        const uploadBtn = document.getElementById('uploadBtn');
-        const cameraBtn = document.getElementById('cameraBtn');
-        const fileInput = document.getElementById('fileInput');
-        const videoContainer = document.getElementById('videoContainer');
-        const video = document.getElementById('video');
-        const captureBtn = document.getElementById('captureBtn');
-        const imageContainer = document.getElementById('imageContainer');
-        const imagePreview = document.getElementById('imagePreview');
-        const resultCanvas = document.getElementById('resultCanvas');
-        const uploadSection = document.getElementById('uploadSection');
-        const adjustmentControls = document.getElementById('adjustmentControls');
-        const modeSelection = document.getElementById('modeSelection');
-        const tryOnContent = document.getElementById('tryOnContent');
-        const recommendContent = document.getElementById('recommendContent');
-        const loadingOverlay = document.getElementById('loadingOverlay');
-
-        // Initialize
-        function init() {
-            setupEventListeners();
-        }
-
-        function setupEventListeners() {
-            uploadBtn.addEventListener('click', () => fileInput.click());
-            fileInput.addEventListener('change', handleFileUpload);
-            cameraBtn.addEventListener('click', startCamera);
-            captureBtn.addEventListener('click', capturePhoto);
-            
-            document.getElementById('tryOnModeBtn').addEventListener('click', () => showMode('tryon'));
-            document.getElementById('recommendModeBtn').addEventListener('click', () => showMode('recommend'));
-            document.getElementById('analyzeBtn').addEventListener('click', analyzeAndRecommend);
-            
-            // Adjustment controls
-            document.getElementById('upBtn').addEventListener('click', () => adjustPosition('up'));
-            document.getElementById('downBtn').addEventListener('click', () => adjustPosition('down'));
-            document.getElementById('leftBtn').addEventListener('click', () => adjustPosition('left'));
-            document.getElementById('rightBtn').addEventListener('click', () => adjustPosition('right'));
-            document.getElementById('plusBtn').addEventListener('click', () => adjustScale('plus'));
-            document.getElementById('minusBtn').addEventListener('click', () => adjustScale('minus'));
-            document.getElementById('rotateLeftBtn').addEventListener('click', () => adjustRotation('left'));
-            document.getElementById('rotateRightBtn').addEventListener('click', () => adjustRotation('right'));
-            document.getElementById('resetBtn').addEventListener('click', resetAdjustments);
-        }
-
-        // File Upload
-        function handleFileUpload(e) {
-            const file = e.target.files[0];
-            if (!file) return;
-
-            const reader = new FileReader();
-            reader.onload = (event) => {
-                const img = new Image();
-                img.onload = () => {
-                    currentImage = img;
-                    displayImage(img);
-                    if (currentMode) {
-                        // Already in a mode, keep showing it
-                    } else {
-                        showModeSelection();
-                    }
-                };
-                img.src = event.target.result;
-            };
-            reader.readAsDataURL(file);
-        }
-
-        // Camera
-        async function startCamera() {
-            try {
-                stream = await navigator.mediaDevices.getUserMedia({ 
-                    video: { facingMode: 'user', width: 640, height: 480 } 
-                });
-                video.srcObject = stream;
-                uploadSection.style.display = 'none';
-                imageContainer.style.display = 'none';
-                videoContainer.style.display = 'block';
-            } catch (err) {
-                alert('Could not access camera: ' + err.message);
-            }
-        }
-
-        function capturePhoto() {
-            const canvas = document.createElement('canvas');
-            canvas.width = video.videoWidth;
-            canvas.height = video.videoHeight;
-            const ctx = canvas.getContext('2d');
-            ctx.drawImage(video, 0, 0);
-
-            const img = new Image();
-            img.onload = () => {
-                currentImage = img;
-                stopCamera();
-                displayImage(img);
-                showModeSelection();
-            };
-            img.src = canvas.toDataURL('image/jpeg');
-        }
-
-        function stopCamera() {
-            if (stream) {
-                stream.getTracks().forEach(track => track.stop());
-                stream = null;
-            }
-            videoContainer.style.display = 'none';
-        }
-
-        // Display Functions
-        function displayImage(img) {
-            imagePreview.src = img.src;
-            uploadSection.style.display = 'none';
-            videoContainer.style.display = 'none';
-            imageContainer.style.display = 'block';
-            resultCanvas.style.display = 'none';
-            imagePreview.style.display = 'block';
-        }
-
-        function displayResult(canvas) {
-            resultCanvas.width = canvas.width;
-            resultCanvas.height = canvas.height;
-            const ctx = resultCanvas.getContext('2d');
-            ctx.drawImage(canvas, 0, 0);
-            
-            imagePreview.style.display = 'none';
-            resultCanvas.style.display = 'block';
-            adjustmentControls.style.display = 'block';
-        }
-
-        // Mode Selection
-        function showModeSelection() {
-            modeSelection.style.display = 'block';
-            tryOnContent.style.display = 'none';
-            recommendContent.style.display = 'none';
-        }
-
-        function showMode(mode) {
-            currentMode = mode;
-            modeSelection.style.display = 'none';
-            
-            if (mode === 'tryon') {
-                populateLashesGrid();
-                tryOnContent.style.display = 'block';
-                recommendContent.style.display = 'none';
-            } else {
-                tryOnContent.style.display = 'none';
-                recommendContent.style.display = 'block';
-                document.getElementById('recommendationsSection').style.display = 'none';
-            }
-        }
-
-        // Populate Lashes Grid
-        function populateLashesGrid() {
-            const grid = document.getElementById('lashesGrid');
-            grid.innerHTML = '';
-            
-            Object.entries(EYELASHES).forEach(([key, lash]) => {
-                const card = createLashCard(lash, key);
-                card.addEventListener('click', () => selectLash(key, lash));
-                grid.appendChild(card);
-            });
-        }
-
-        function createLashCard(lash, key) {
-            const card = document.createElement('div');
-            card.className = 'lash-card';
-            card.innerHTML = `
-                <img src="${lash.image}" alt="${lash.name}" onerror="this.src='eyelashes/placeholder.png'">
-                <p>${lash.name}</p>
-            `;
-            card.dataset.lashKey = key;
-            return card;
-        }
-
-        // Select and Apply Lash
-        async function selectLash(key, lash) {
-            if (!currentImage) {
-                alert('Please upload or capture an image first');
-                return;
-            }
-
-            selectedEyelash = key;
-            
-            // Highlight selected
-            document.querySelectorAll('.lash-card').forEach(c => c.classList.remove('selected'));
-            document.querySelector(`[data-lash-key="${key}"]`).classList.add('selected');
-
-            // Apply try-on
-            await applyTryOn();
-        }
-
-        async function applyTryOn() {
-            if (!currentImage || !selectedEyelash) return;
-
-            loadingOverlay.style.display = 'flex';
-
-            try {
-                const eyelashImg = await loadEyelashImage(selectedEyelash);
-                
-                const options = {
-                    vertical_offset: adjustments.vertical,
-                    horizontal_offset: adjustments.horizontal,
-                    size_scale: adjustments.scale,
-                    height_scale: adjustments.height,
-                    rotation_angle: adjustments.rotation
-                };
-
-                const resultCan = await tryOnSystem.processEyelash(currentImage, eyelashImg, options);
-                displayResult(resultCan);
-            } catch (err) {
-                alert('Error applying eyelash: ' + err.message);
-                console.error(err);
-            } finally {
-                loadingOverlay.style.display = 'none';
-            }
-        }
-
-        // Load Eyelash Image
-        async function loadEyelashImage(key) {
-            if (eyelashImages[key]) {
-                return eyelashImages[key];
-            }
-
-            return new Promise((resolve, reject) => {
-                const img = new Image();
-                img.onload = () => {
-                    eyelashImages[key] = img;
-                    resolve(img);
-                };
-                img.onerror = () => reject(new Error(`Could not load eyelash: ${key}`));
-                img.src = EYELASHES[key].image;
-            });
-        }
-
-        // Adjustment Controls
-        function adjustPosition(direction) {
-            const step = 5;
-            switch(direction) {
-                case 'up': adjustments.vertical -= step; break;
-                case 'down': adjustments.vertical += step; break;
-                case 'left': adjustments.horizontal -= step; break;
-                case 'right': adjustments.horizontal += step; break;
-            }
-            applyTryOn();
-        }
-
-        function adjustScale(direction) {
-            const step = 0.1;
-            if (direction === 'plus') {
-                adjustments.scale = Math.min(3.0, adjustments.scale + step);
-            } else {
-                adjustments.scale = Math.max(0.5, adjustments.scale - step);
-            }
-            document.getElementById('scaleValue').textContent = adjustments.scale.toFixed(1);
-            applyTryOn();
-        }
-
-        function adjustRotation(direction) {
-            const step = 5;
-            if (direction === 'left') {
-                adjustments.rotation -= step;
-            } else {
-                adjustments.rotation += step;
-            }
-            applyTryOn();
-        }
-
-        function resetAdjustments() {
-            adjustments = {
-                vertical: -10,
-                horizontal: 0,
-                scale: 2.0,
-                height: 1.0,
-                rotation: 0
-            };
-            document.getElementById('scaleValue').textContent = '2.0';
-            applyTryOn();
-        }
-
-        // Recommendation System
-        async function analyzeAndRecommend() {
-            if (!currentImage) {
-                alert('Please upload or capture an image first');
-                return;
-            }
-
-            loadingOverlay.style.display = 'flex';
-
-            try {
-                const result = await recommender.analyzeAndRecommend(currentImage);
-                displayRecommendations(result);
-            } catch (err) {
-                alert('Error analyzing image: ' + err.message);
-                console.error(err);
-            } finally {
-                loadingOverlay.style.display = 'none';
-            }
-        }
-
-        function displayRecommendations(result) {
-            const { classification, measurements, recommendations } = result;
-            
-            // Show recommendations section
-            document.getElementById('recommendationsSection').style.display = 'block';
-            
-            // Display top picks
-            const topPicks = document.getElementById('topPicks');
-            topPicks.innerHTML = '';
-            
-            recommendations.top_picks.slice(0, 3).forEach((product, index) => {
-                const lashKey = Object.keys(EYELASHES).find(k => 
-                    EYELASHES[k].name.toLowerCase() === product.name.toLowerCase()
-                );
-                
-                if (lashKey) {
-                    const card = createLashCard(EYELASHES[lashKey], lashKey);
-                    card.classList.add('recommended');
-                    card.addEventListener('click', () => {
-                        showMode('tryon');
-                        setTimeout(() => selectLash(lashKey, EYELASHES[lashKey]), 100);
-                    });
-                    topPicks.appendChild(card);
-                }
-            });
-            
-            // Display all lashes
-            const allLashesGrid = document.getElementById('allLashesGrid');
-            allLashesGrid.innerHTML = '';
-            
-            Object.entries(EYELASHES).forEach(([key, lash]) => {
-                const card = createLashCard(lash, key);
-                card.addEventListener('click', () => {
-                    showMode('tryon');
-                    setTimeout(() => selectLash(key, lash), 100);
-                });
-                allLashesGrid.appendChild(card);
-            });
-            
-            // Display analysis info
-            const analysisInfo = document.getElementById('analysisInfo');
-            analysisInfo.innerHTML = `
-                <h4>Your Eye Analysis</h4>
-                <div class="info-grid">
-                    <div class="info-item">
-                        <span class="label">Eye Shape:</span>
-                        <span class="value">${classification.eye_shape}</span>
-                    </div>
-                    <div class="info-item">
-                        <span class="label">Eye Size:</span>
-                        <span class="value">${classification.eye_size}</span>
-                    </div>
-                    <div class="info-item">
-                        <span class="label">Eye Spacing:</span>
-                        <span class="value">${classification.eye_spacing}</span>
-                    </div>
-                    <div class="info-item">
-                        <span class="label">Symmetry:</span>
-                        <span class="value">${(measurements.symmetry_score * 100).toFixed(0)}%</span>
-                    </div>
-                </div>
-                ${recommendations.shape_tip ? `<p class="tip">💡 ${recommendations.shape_tip}</p>` : ''}
-                ${recommendations.application_tip ? `<p class="tip">✨ ${recommendations.application_tip}</p>` : ''}
-            `;
-        }
-
-        // Initialize app
-        init();
-    </script>
-</body>
-</html>
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+    background: #ffffff;
+    color: #333;
+}
+
+/* Main Header */
+.main-header {
+    text-align: center;
+    padding: 20px 0;
+    background: #fff;
+    border-bottom: 1px solid #eee;
+}
+
+.main-header h1 {
+    font-size: 28px;
+    font-weight: 600;
+    color: #333;
+}
+
+.container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.main-layout {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 40px;
+    margin-top: 20px;
+}
+
+/* Left Panel - Image Display */
+.left-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.image-display {
+    background: #f8f9fa;
+    border-radius: 8px;
+    min-height: 500px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+    flex-direction: column;
+}
+
+/* Upload Section */
+.upload-section {
+    text-align: center;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    width: 100%;
+}
+
+.upload-controls {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+    width: 100%;
+}
+
+.control-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 24px;
+    background: #fff;
+    border: 2px solid #ddd;
+    border-radius: 25px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.3s;
+}
+
+.control-btn:hover {
+    border-color: #e60076;
+    background: #fff0f7;
+}
+
+.control-btn svg {
+    width: 20px;
+    height: 20px;
+}
+
+#uploadBtn, #uploadBtnBottom {
+    background: #e60076;
+    color: white;
+    border-color: #e60076;
+}
+
+#uploadBtn:hover, #uploadBtnBottom:hover {
+    background: #cc0066;
+    border-color: #cc0066;
+}
+
+#cameraBtn:hover, #cameraBtnBottom:hover {
+    background: #fff0f7;
+    border-color: #e60076;
+}
+
+/* Bottom Controls */
+.bottom-controls {
+    position: absolute;
+    bottom: 20px;
+    left: 0;
+    right: 0;
+    display: flex;
+    justify-content: center;
+    padding: 10px;
+    z-index: 10;
+    background: rgba(248, 249, 250, 0.9);
+    backdrop-filter: blur(5px);
+    border-top: 1px solid #e9ecef;
+}
+
+/* Video Container */
+.video-container {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#video {
+    max-width: 100%;
+    max-height: 500px;
+    border-radius: 8px;
+}
+
+.face-guide-box {
+    position: absolute;
+    border: 3px solid #e60076;
+    width: 280px;
+    height: 360px;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+    border-radius: 4px;
+}
+
+.capture-btn {
+    position: absolute;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    border: 4px solid #fff;
+    background: #e60076;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s;
+    box-shadow: 0 4px 12px rgba(230, 0, 118, 0.3);
+}
+
+.capture-btn:hover {
+    transform: translateX(-50%) scale(1.1);
+    background: #cc0066;
+}
+
+.capture-btn svg {
+    fill: #fff;
+}
+
+/* Image Container */
+.image-container {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    padding: 20px;
+}
+
+.image-preview-wrapper {
+    max-width: 100%;
+    max-height: 400px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+}
+
+#imagePreview, #resultCanvas {
+    max-width: 100%;
+    max-height: 400px;
+    border-radius: 8px;
+    object-fit: contain;
+}
+
+/* Adjustment Controls */
+.adjustment-controls {
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    margin: 20px auto;
+    width: fit-content;
+}
+
+.control-row {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+}
+
+.adj-btn {
+    width: 40px;
+    height: 40px;
+    border: 2px solid #ddd;
+    background: #fff;
+    border-radius: 4px;
+    font-size: 18px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.adj-btn:hover {
+    border-color: #e60076;
+    background: #fff0f7;
+}
+
+.adj-btn:active {
+    transform: scale(0.95);
+}
+
+.scale-value {
+    min-width: 40px;
+    text-align: center;
+    font-weight: bold;
+    color: #333;
+    font-size: 14px;
+}
+
+/* Right Panel */
+.right-panel {
+    display: flex;
+    flex-direction: column;
+}
+
+.mode-selection {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.mode-selection h2 {
+    font-size: 24px;
+    margin-bottom: 10px;
+}
+
+.mode-btn {
+    padding: 20px;
+    background: #fff;
+    border: 2px solid #ddd;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s;
+    text-align: left;
+}
+
+.mode-btn:hover {
+    border-color: #e60076;
+    box-shadow: 0 4px 12px rgba(230, 0, 118, 0.1);
+    background: #fff0f7;
+}
+
+.mode-btn span {
+    display: block;
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 5px;
+}
+
+.mode-btn small {
+    color: #666;
+    font-size: 14px;
+}
+
+/* Mode Switcher */
+.mode-switcher {
+    background: #f8f9fa;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+.mode-switcher h2 {
+    font-size: 20px;
+    margin-bottom: 15px;
+    color: #333;
+}
+
+.switcher-buttons {
+    display: flex;
+    gap: 10px;
+}
+
+.switcher-btn {
+    padding: 12px 20px;
+    background: #fff;
+    border: 2px solid #ddd;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.3s;
+    flex: 1;
+}
+
+.switcher-btn:hover {
+    border-color: #e60076;
+    background: #fff0f7;
+}
+
+.switcher-btn.active {
+    background: #e60076;
+    color: white;
+    border-color: #e60076;
+}
+
+/* Try-On Content */
+.try-on-content h2,
+.recommend-content h2 {
+    font-size: 24px;
+    margin-bottom: 20px;
+}
+
+.lashes-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 15px;
+    max-height: 600px;
+    overflow-y: auto;
+    padding: 10px;
+}
+
+.lash-card {
+    background: #fff;
+    border: 2px solid #ddd;
+    border-radius: 8px;
+    padding: 10px;
+    cursor: pointer;
+    transition: all 0.3s;
+    text-align: center;
+}
+
+.lash-card:hover {
+    border-color: #e60076;
+    box-shadow: 0 4px 12px rgba(230, 0, 118, 0.1);
+    transform: translateY(-2px);
+}
+
+.lash-card.selected {
+    border-color: #e60076;
+    background: #fff0f7;
+}
+
+.lash-card.recommended {
+    border-color: #e60076;
+    background: #fff0f7;
+}
+
+.lash-card img {
+    width: 100%;
+    height: 60px;
+    object-fit: contain;
+    margin-bottom: 8px;
+}
+
+.lash-card p {
+    font-size: 12px;
+    font-weight: 500;
+    color: #333;
+    word-break: break-word;
+}
+
+/* Recommendation Content */
+.recommend-btn {
+    padding: 16px 32px;
+    background: #e60076;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+    margin-bottom: 20px;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.recommend-btn:hover {
+    background: #cc0066;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(230, 0, 118, 0.3);
+}
+
+.recommendations-section h3 {
+    font-size: 20px;
+    margin: 20px 0 15px;
+}
+
+.top-picks {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 15px;
+    margin-bottom: 30px;
+}
+
+.analysis-info {
+    background: #f8f9fa;
+    border-radius: 8px;
+    padding: 20px;
+    margin-top: 20px;
+}
+
+.analysis-info h4 {
+    font-size: 18px;
+    margin-bottom: 15px;
+}
+
+.info-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+    margin-bottom: 15px;
+}
+
+.info-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px;
+    background: #fff;
+    border-radius: 4px;
+}
+
+.info-item .label {
+    font-weight: 500;
+    color: #666;
+}
+
+.info-item .value {
+    font-weight: 600;
+    color: #e60076;
+}
+
+.tip {
+    background: #fff0f7;
+    padding: 12px;
+    border-radius: 4px;
+    margin-top: 10px;
+    font-size: 14px;
+    color: #333;
+    border-left: 4px solid #e60076;
+}
+
+/* Loading Overlay */
+.loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.7);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.spinner {
+    width: 50px;
+    height: 50px;
+    border: 4px solid #f3f3f3;
+    border-top: 4px solid #e60076;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.loading-overlay p {
+    color: #fff;
+    font-size: 16px;
+}
+
+/* Scrollbar Styling */
+.lashes-grid::-webkit-scrollbar {
+    width: 8px;
+}
+
+.lashes-grid::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 4px;
+}
+
+.lashes-grid::-webkit-scrollbar-thumb {
+    background: #e60076;
+    border-radius: 4px;
+}
+
+.lashes-grid::-webkit-scrollbar-thumb:hover {
+    background: #cc0066;
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+    .main-layout {
+        grid-template-columns: 1fr;
+    }
+
+    .top-picks {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+@media (max-width: 768px) {
+    .main-header h1 {
+        font-size: 24px;
+    }
+    
+    .lashes-grid {
+        grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+        gap: 10px;
+    }
+
+    .top-picks {
+        grid-template-columns: 1fr;
+    }
+
+    .info-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .control-row {
+        flex-wrap: wrap;
+    }
+    
+    .upload-controls {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .switcher-buttons {
+        flex-direction: column;
+    }
+
+    .image-container {
+        padding: 10px;
+    }
+
+    .image-preview-wrapper {
+        max-height: 350px;
+    }
+
+    #imagePreview, #resultCanvas {
+        max-height: 350px;
+    }
+}
+
+@media (max-width: 480px) {
+    .image-preview-wrapper {
+        max-height: 300px;
+    }
+
+    #imagePreview, #resultCanvas {
+        max-height: 300px;
+    }
+
+    .bottom-controls {
+        padding: 5px;
+    }
+
+    .control-btn {
+        padding: 10px 16px;
+        font-size: 12px;
+    }
+}
