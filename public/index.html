@@ -570,7 +570,7 @@
     </div>
 
     <script>
-
+        // Include the JavaScript code from the previous artifact here
         // ---------- CONSTANTS ----------
         const LEFT_EYE_UPPER = [246, 161, 160, 159, 158, 157, 173, 133, 155, 154, 153, 145, 144, 163, 7];
         const RIGHT_EYE_UPPER = [466, 388, 387, 386, 385, 384, 398, 362, 382, 381, 380, 374, 373, 390, 249];
@@ -597,17 +597,14 @@
             constructor() {
                 this.faceMeshModel = null;
                 
-                // Eye landmarks indices
                 this.RIGHT_EYE = [33, 133, 160, 159, 158, 157, 173, 155, 154, 153, 145, 144, 163, 7];
                 this.LEFT_EYE = [263, 362, 387, 386, 385, 384, 398, 382, 381, 380, 374, 373, 390, 249];
                 
-                // Key points for measurements
                 this.RIGHT_EYE_INNER = 133;
                 this.RIGHT_EYE_OUTER = 33;
                 this.LEFT_EYE_INNER = 362;
                 this.LEFT_EYE_OUTER = 263;
                 
-                // Inventory with detailed specifications
                 this.inventory = {
                     "Cat Eye Styles": {
                         "Foxy": {
@@ -710,7 +707,6 @@
             getEyeMeasurements(landmarks, imgWidth, imgHeight) {
                 const measurements = {};
                 
-                // Convert landmarks to pixel coordinates
                 const rightEyeInner = [
                     landmarks[this.RIGHT_EYE_INNER][0] * imgWidth,
                     landmarks[this.RIGHT_EYE_INNER][1] * imgHeight
@@ -728,19 +724,16 @@
                     landmarks[this.LEFT_EYE_OUTER][1] * imgHeight
                 ];
                 
-                // Right eye measurements
                 const rightEyeTop = [landmarks[159][0] * imgWidth, landmarks[159][1] * imgHeight];
                 const rightEyeBottom = [landmarks[145][0] * imgWidth, landmarks[145][1] * imgHeight];
                 const rightEyeTop2 = [landmarks[160][0] * imgWidth, landmarks[160][1] * imgHeight];
                 const rightEyeBottom2 = [landmarks[144][0] * imgWidth, landmarks[144][1] * imgHeight];
                 
-                // Left eye measurements
                 const leftEyeTop = [landmarks[386][0] * imgWidth, landmarks[386][1] * imgHeight];
                 const leftEyeBottom = [landmarks[374][0] * imgWidth, landmarks[374][1] * imgHeight];
                 const leftEyeTop2 = [landmarks[387][0] * imgWidth, landmarks[387][1] * imgHeight];
                 const leftEyeBottom2 = [landmarks[373][0] * imgWidth, landmarks[373][1] * imgHeight];
                 
-                // Calculate absolute measurements
                 const rightEyeWidth = this.calculateDistance(rightEyeInner, rightEyeOuter);
                 const leftEyeWidth = this.calculateDistance(leftEyeInner, leftEyeOuter);
                 
@@ -752,30 +745,24 @@
                 const leftEyeHeight2 = this.calculateDistance(leftEyeTop2, leftEyeBottom2);
                 const leftEyeHeight = (leftEyeHeight1 + leftEyeHeight2) / 2;
                 
-                // Inter-eye distance
                 const interEyeDistance = this.calculateDistance(rightEyeInner, leftEyeInner);
                 
-                // Face width (for relative measurements)
                 const faceLeft = [landmarks[234][0] * imgWidth, landmarks[234][1] * imgHeight];
                 const faceRight = [landmarks[454][0] * imgWidth, landmarks[454][1] * imgHeight];
                 const faceWidth = this.calculateDistance(faceLeft, faceRight);
                 
-                // Calculate RELATIVE measurements (scale-invariant)
                 const avgEyeWidth = (rightEyeWidth + leftEyeWidth) / 2;
                 
                 measurements.right_eye_width_relative = rightEyeWidth / faceWidth;
                 measurements.left_eye_width_relative = leftEyeWidth / faceWidth;
                 measurements.avg_eye_width_relative = avgEyeWidth / faceWidth;
                 
-                // Eye Aspect Ratio (height/width) - naturally relative
                 measurements.right_ear = rightEyeHeight / rightEyeWidth;
                 measurements.left_ear = leftEyeHeight / leftEyeWidth;
                 measurements.avg_ear = (measurements.right_ear + measurements.left_ear) / 2;
                 
-                // Inter-eye distance relative to eye width
                 measurements.inter_eye_ratio = interEyeDistance / avgEyeWidth;
                 
-                // Calculate eye angles (upturned vs downturned)
                 const rightAngle = Math.atan2(
                     rightEyeOuter[1] - rightEyeInner[1],
                     rightEyeOuter[0] - rightEyeInner[0]
@@ -790,7 +777,6 @@
                 measurements.left_eye_angle = leftAngle;
                 measurements.avg_eye_angle = (rightAngle + leftAngle) / 2;
                 
-                // Eyelid visibility (hooded detection)
                 const rightCrease = [landmarks[157][0] * imgWidth, landmarks[157][1] * imgHeight];
                 const leftCrease = [landmarks[384][0] * imgWidth, landmarks[384][1] * imgHeight];
                 
@@ -801,7 +787,6 @@
                 measurements.left_lid_visibility = leftLidVisibility;
                 measurements.avg_lid_visibility = (rightLidVisibility + leftLidVisibility) / 2;
                 
-                // Symmetry score
                 measurements.symmetry_score = 1 - Math.abs(rightEyeWidth - leftEyeWidth) / avgEyeWidth;
                 
                 return measurements;
@@ -812,7 +797,6 @@
                 const angle = measurements.avg_eye_angle;
                 const lidVisibility = measurements.avg_lid_visibility;
                 
-                // Eye shape classification
                 if (lidVisibility < 0.3) {
                     return "Hooded";
                 } else if (ear > 0.5) {
@@ -863,30 +847,25 @@
             calculateMatchScore(shape, size, spacing, productDetails) {
                 let score = 100;
                 
-                // Perfect match for hooded eyes with specific products
                 if (shape === "Hooded" && productDetails.suitable_shapes.includes("Hooded")) {
                     score += 50;
                 }
                 
-                // Prioritize universal products
-                if (productDetails.suitable_sizes.length === 3) {  // Universal size
+                if (productDetails.suitable_sizes.length === 3) {
                     score += 10;
                 }
-                if (productDetails.suitable_shapes.length >= 4) {  // Works with many shapes
+                if (productDetails.suitable_shapes.length >= 4) {
                     score += 10;
                 }
                 
-                // Cat eye styles work best for elongation
                 if (["Round", "Downturned"].includes(shape) && productDetails.style_type.includes("Cat Eye")) {
                     score += 20;
                 }
                 
-                // Doll eye styles work best for round enhancement
                 if (["Almond", "Upturned"].includes(shape) && productDetails.style_type.includes("Doll Eye")) {
                     score += 15;
                 }
                 
-                // Natural styles for subtle looks
                 if (size === "Small" && productDetails.style_type.includes("Natural")) {
                     score += 15;
                 }
@@ -899,7 +878,6 @@
                 
                 for (const [category, products] of Object.entries(this.inventory)) {
                     for (const [productName, details] of Object.entries(products)) {
-                        // Check if product matches eye size and shape
                         const sizeMatch = details.suitable_sizes.includes(size);
                         const shapeMatch = details.suitable_shapes.includes(shape);
                         
@@ -917,20 +895,16 @@
                     }
                 }
                 
-                // Sort by match score
                 recommendedProducts.sort((a, b) => b.match_score - a.match_score);
                 
-                // Get top 3 recommendations
                 const topRecommendations = recommendedProducts.slice(0, 3);
                 
-                // Spacing-based application tips
                 const spacingTips = {
                     "Close-set": "Focus application on outer 2/3 of lash line to create width",
                     "Wide-set": "Focus application on inner 2/3 of lash line to bring eyes closer",
                     "Average-set": "Apply evenly across entire lash line for balanced look"
                 };
                 
-                // Shape-based tips
                 const shapeTips = {
                     "Hooded": "Your hooded eyes look best with curled, wispy lashes that lift and open the eye. Avoid heavy styles.",
                     "Round": "Elongate your beautiful round eyes with cat-eye styles that emphasize the outer corners.",
@@ -966,15 +940,12 @@
                 const imgWidth = imageElement.width;
                 const imgHeight = imageElement.height;
                 
-                // Get measurements
                 const measurements = this.getEyeMeasurements(landmarks, imgWidth, imgHeight);
                 
-                // Classify eyes
                 const eyeShape = this.classifyEyeShape(measurements);
                 const eyeSize = this.classifyEyeSize(measurements);
                 const eyeSpacing = this.classifyEyeSpacing(measurements);
                 
-                // Get recommendations
                 const recommendations = this.recommendEyelashes(eyeShape, eyeSize, eyeSpacing);
                 
                 return {
@@ -1038,16 +1009,13 @@
             overlayTransparentImage(backgroundCanvas, overlayCanvas, x, y, width, height, rotationAngle = 0) {
                 const ctx = backgroundCanvas.getContext('2d');
                 
-                // Create a temporary canvas for the overlay
                 const tempCanvas = document.createElement('canvas');
                 const tempCtx = tempCanvas.getContext('2d');
                 tempCanvas.width = width;
                 tempCanvas.height = height;
                 
-                // Draw resized overlay
                 tempCtx.drawImage(overlayCanvas, 0, 0, width, height);
                 
-                // Apply rotation if specified
                 let finalCanvas = tempCanvas;
                 let finalX = x;
                 let finalY = y;
@@ -1055,7 +1023,6 @@
                 if (rotationAngle !== 0) {
                     finalCanvas = this.rotateCanvas(tempCanvas, rotationAngle);
                     
-                    // Adjust position to keep center at same location
                     const newWidth = finalCanvas.width;
                     const newHeight = finalCanvas.height;
                     
@@ -1063,7 +1030,6 @@
                     finalY = y - (newHeight - height) / 2;
                 }
                 
-                // Draw on background
                 ctx.drawImage(finalCanvas, finalX, finalY);
             }
             
@@ -1117,41 +1083,34 @@
                 const imgWidth = imageElement.width;
                 const imgHeight = imageElement.height;
                 
-                // Create output canvas
                 const outputCanvas = document.createElement('canvas');
                 outputCanvas.width = imgWidth;
                 outputCanvas.height = imgHeight;
                 const ctx = outputCanvas.getContext('2d');
                 
-                // Draw original image
                 ctx.drawImage(imageElement, 0, 0);
                 
-                // Get eye regions
                 const leftInfo = this.getEyeRegionInfo(landmarks, LEFT_EYE_UPPER, LEFT_EYE_INNER, LEFT_EYE_OUTER, imgWidth, imgHeight);
                 const rightInfo = this.getEyeRegionInfo(landmarks, RIGHT_EYE_UPPER, RIGHT_EYE_INNER, RIGHT_EYE_OUTER, imgWidth, imgHeight);
                 
                 const lashAspect = eyelashImage.width / eyelashImage.height;
                 
-                // LEFT EYE
                 const lw = Math.floor(leftInfo.width * size_scale);
                 const lh = Math.floor((lw / lashAspect) * height_scale);
                 const lx = leftInfo.center_x - lw / 2 + horizontal_offset;
                 const ly = leftInfo.center_y + vertical_offset - lh / 2;
                 
-                // RIGHT EYE (negative rotation for mirrored eye)
                 const rw = Math.floor(rightInfo.width * size_scale);
                 const rh = Math.floor((rw / lashAspect) * height_scale);
                 const rx = rightInfo.center_x - rw / 2 - horizontal_offset;
                 const ry = rightInfo.center_y + vertical_offset - rh / 2;
                 
-                // Create canvas for eyelash
                 const eyelashCanvas = document.createElement('canvas');
                 eyelashCanvas.width = eyelashImage.width;
                 eyelashCanvas.height = eyelashImage.height;
                 const eyelashCtx = eyelashCanvas.getContext('2d');
                 eyelashCtx.drawImage(eyelashImage, 0, 0);
                 
-                // Create flipped version
                 const flippedCanvas = document.createElement('canvas');
                 flippedCanvas.width = eyelashImage.width;
                 flippedCanvas.height = eyelashImage.height;
@@ -1160,7 +1119,6 @@
                 flippedCtx.scale(-1, 1);
                 flippedCtx.drawImage(eyelashImage, 0, 0);
                 
-                // Apply eyelashes with rotation
                 this.overlayTransparentImage(outputCanvas, eyelashCanvas, rx, ry, rw, rh, -rotation_angle);
                 this.overlayTransparentImage(outputCanvas, flippedCanvas, lx, ly, lw, lh, rotation_angle);
                 
@@ -1168,53 +1126,351 @@
             }
         }
 
-        // ---------- UTILITY FUNCTIONS ----------
-        function loadImageFromFile(file) {
-            return new Promise((resolve, reject) => {
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    const img = new Image();
-                    img.onload = () => resolve(img);
-                    img.onerror = reject;
-                    img.src = e.target.result;
-                };
-                reader.onerror = reject;
-                reader.readAsDataURL(file);
-            });
-        }
-
-        function loadImageFromPath(path) {
-            return new Promise((resolve, reject) => {
-                const img = new Image();
-                img.onload = () => resolve(img);
-                img.onerror = reject;
-                img.src = path;
-            });
-        }
-
-        function canvasToBlob(canvas, type = 'image/jpeg', quality = 0.95) {
-            return new Promise((resolve) => {
-                canvas.toBlob(resolve, type, quality);
-            });
-        }
-
-        // ---------- EXPORTS ----------
+        // ---------- APPLICATION STATE ----------
         const recommender = new EyelashRecommendationSystem();
         const tryOnSystem = new EyelashTryOnSystem();
-
-        // Export for use in HTML
-        if (typeof module !== 'undefined' && module.exports) {
-            module.exports = {
-                EyelashRecommendationSystem,
-                EyelashTryOnSystem,
-                recommender,
-                tryOnSystem,
-                loadImageFromFile,
-                loadImageFromPath,
-                canvasToBlob,
-                EYELASH_NAMES
-            };
+        
+        let currentImage = null;
+        let selectedEyelash = null;
+        let stream = null;
+        let eyelashImages = {};
+        
+        // ---------- UI ELEMENTS ----------
+        const fileUpload = document.getElementById('fileUpload');
+        const startCamera = document.getElementById('startCamera');
+        const stopCamera = document.getElementById('stopCamera');
+        const capturePhoto = document.getElementById('capturePhoto');
+        const video = document.getElementById('video');
+        const videoWrapper = document.getElementById('videoWrapper');
+        const imagePreview = document.getElementById('imagePreview');
+        const resultCanvas = document.getElementById('resultCanvas');
+        const uploadPrompt = document.getElementById('uploadPrompt');
+        const tryOnBtn = document.getElementById('tryOnBtn');
+        const recommendBtn = document.getElementById('recommendBtn');
+        const resetBtn = document.getElementById('resetBtn');
+        const applyAdjustments = document.getElementById('applyAdjustments');
+        const loadingOverlay = document.getElementById('loadingOverlay');
+        const eyelashGrid = document.getElementById('eyelashGrid');
+        const cameraStatus = document.getElementById('cameraStatus');
+        const recommendationsSection = document.getElementById('recommendationsSection');
+        
+        // Control elements
+        const verticalOffset = document.getElementById('verticalOffset');
+        const horizontalOffset = document.getElementById('horizontalOffset');
+        const sizeScale = document.getElementById('sizeScale');
+        const heightScale = document.getElementById('heightScale');
+        const rotationAngle = document.getElementById('rotationAngle');
+        const resetControls = document.getElementById('resetControls');
+        
+        // Value displays
+        const verticalValue = document.getElementById('verticalValue');
+        const horizontalValue = document.getElementById('horizontalValue');
+        const sizeValue = document.getElementById('sizeValue');
+        const heightValue = document.getElementById('heightValue');
+        const rotationValue = document.getElementById('rotationValue');
+        
+        // ---------- INITIALIZE ----------
+        function initializeEyelashGrid() {
+            eyelashGrid.innerHTML = '';
+            Object.keys(EYELASH_NAMES).forEach(name => {
+                const option = document.createElement('div');
+                option.className = 'eyelash-option';
+                option.innerHTML = `<h4>${name}</h4>`;
+                option.onclick = () => selectEyelash(name, option);
+                eyelashGrid.appendChild(option);
+            });
         }
+        
+        function selectEyelash(name, element) {
+            document.querySelectorAll('.eyelash-option').forEach(opt => {
+                opt.classList.remove('selected');
+            });
+            element.classList.add('selected');
+            selectedEyelash = name;
+            
+            if (currentImage) {
+                tryOnBtn.disabled = false;
+                applyAdjustments.disabled = false;
+            }
+        }
+        
+        // ---------- CONTROL SLIDERS ----------
+        verticalOffset.oninput = () => verticalValue.textContent = verticalOffset.value;
+        horizontalOffset.oninput = () => horizontalValue.textContent = horizontalOffset.value;
+        sizeScale.oninput = () => sizeValue.textContent = parseFloat(sizeScale.value).toFixed(1);
+        heightScale.oninput = () => heightValue.textContent = parseFloat(heightScale.value).toFixed(1);
+        rotationAngle.oninput = () => rotationValue.textContent = rotationAngle.value + '°';
+        
+        resetControls.onclick = () => {
+            verticalOffset.value = -10;
+            horizontalOffset.value = 0;
+            sizeScale.value = 2.0;
+            heightScale.value = 1.0;
+            rotationAngle.value = 0;
+            
+            verticalValue.textContent = '-10';
+            horizontalValue.textContent = '0';
+            sizeValue.textContent = '2.0';
+            heightValue.textContent = '1.0';
+            rotationValue.textContent = '0°';
+        };
+        
+        // ---------- FILE UPLOAD ----------
+        fileUpload.onchange = async (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                const img = new Image();
+                img.onload = () => {
+                    currentImage = img;
+                    displayImage(img);
+                    enableButtons();
+                };
+                img.src = event.target.result;
+            };
+            reader.readAsDataURL(file);
+        };
+        
+        // ---------- CAMERA ----------
+        startCamera.onclick = async () => {
+            try {
+                stream = await navigator.mediaDevices.getUserMedia({ 
+                    video: { facingMode: 'user' } 
+                });
+                video.srcObject = stream;
+                video.classList.add('active');
+                videoWrapper.style.display = 'block';
+                uploadPrompt.style.display = 'none';
+                imagePreview.classList.remove('active');
+                resultCanvas.style.display = 'none';
+                
+                startCamera.style.display = 'none';
+                capturePhoto.style.display = 'block';
+                stopCamera.style.display = 'block';
+                cameraStatus.style.display = 'block';
+                
+                tryOnBtn.disabled = true;
+                recommendBtn.disabled = true;
+                applyAdjustments.disabled = true;
+            } catch (err) {
+                alert('Could not access camera: ' + err.message);
+            }
+        };
+        
+        capturePhoto.onclick = () => {
+            const canvas = document.createElement('canvas');
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(video, 0, 0);
+            
+            const img = new Image();
+            img.onload = () => {
+                currentImage = img;
+                stopCameraStream();
+                displayImage(img);
+                enableButtons();
+            };
+            img.src = canvas.toDataURL('image/jpeg');
+        };
+        
+        stopCamera.onclick = stopCameraStream;
+        
+        function stopCameraStream() {
+            if (stream) {
+                stream.getTracks().forEach(track => track.stop());
+                stream = null;
+            }
+            video.classList.remove('active');
+            videoWrapper.style.display = 'none';
+            startCamera.style.display = 'block';
+            capturePhoto.style.display = 'none';
+            stopCamera.style.display = 'none';
+            cameraStatus.style.display = 'none';
+        }
+        
+        // ---------- DISPLAY FUNCTIONS ----------
+        function displayImage(img) {
+            imagePreview.src = img.src;
+            imagePreview.classList.add('active');
+            uploadPrompt.style.display = 'none';
+            resultCanvas.style.display = 'none';
+            resetBtn.style.display = 'inline-block';
+        }
+        
+        function displayResult(canvas) {
+            resultCanvas.width = canvas.width;
+            resultCanvas.height = canvas.height;
+            const ctx = resultCanvas.getContext('2d');
+            ctx.drawImage(canvas, 0, 0);
+            
+            imagePreview.classList.remove('active');
+            resultCanvas.style.display = 'block';
+        }
+        
+        function enableButtons() {
+            recommendBtn.disabled = false;
+            if (selectedEyelash) {
+                tryOnBtn.disabled = false;
+                applyAdjustments.disabled = false;
+            }
+        }
+        
+        // ---------- TRY ON ----------
+        tryOnBtn.onclick = async () => {
+            if (!currentImage || !selectedEyelash) return;
+            
+            loadingOverlay.classList.add('active');
+            
+            try {
+                const eyelashImg = await loadEyelashImage(selectedEyelash);
+                
+                const options = {
+                    vertical_offset: parseInt(verticalOffset.value),
+                    horizontal_offset: parseInt(horizontalOffset.value),
+                    size_scale: parseFloat(sizeScale.value),
+                    height_scale: parseFloat(heightScale.value),
+                    rotation_angle: parseFloat(rotationAngle.value)
+                };
+                
+                const resultCan = await tryOnSystem.processEyelash(currentImage, eyelashImg, options);
+                displayResult(resultCan);
+                
+            } catch (err) {
+                alert('Error: ' + err.message);
+            } finally {
+                loadingOverlay.classList.remove('active');
+            }
+        };
+        
+        applyAdjustments.onclick = tryOnBtn.onclick;
+        
+        // ---------- RECOMMENDATIONS ----------
+        recommendBtn.onclick = async () => {
+            if (!currentImage) return;
+            
+            loadingOverlay.classList.add('active');
+            
+            try {
+                const result = await recommender.analyzeAndRecommend(currentImage);
+                displayRecommendations(result);
+            } catch (err) {
+                alert('Error: ' + err.message);
+            } finally {
+                loadingOverlay.classList.remove('active');
+            }
+        };
+        
+        function displayRecommendations(result) {
+            const { classification, measurements, recommendations } = result;
+            
+            const classificationInfo = document.getElementById('classificationInfo');
+            classificationInfo.innerHTML = `
+                <h4>Your Eye Characteristics</h4>
+                <div class="info-row">
+                    <span class="info-label">Eye Shape:</span>
+                    <span class="info-value">${classification.eye_shape}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Eye Size:</span>
+                    <span class="info-value">${classification.eye_size}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Eye Spacing:</span>
+                    <span class="info-value">${classification.eye_spacing}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Symmetry Score:</span>
+                    <span class="info-value">${(measurements.symmetry_score * 100).toFixed(0)}%</span>
+                </div>
+            `;
+            
+            const recommendationsContainer = document.getElementById('recommendationsContainer');
+            recommendationsContainer.innerHTML = '';
+            
+            if (recommendations.shape_tip) {
+                const tipCard = document.createElement('div');
+                tipCard.className = 'alert alert-info';
+                tipCard.innerHTML = `<strong>💡 Tip:</strong> ${recommendations.shape_tip}`;
+                recommendationsContainer.appendChild(tipCard);
+            }
+            
+            if (recommendations.application_tip) {
+                const appCard = document.createElement('div');
+                appCard.className = 'alert alert-success';
+                appCard.innerHTML = `<strong>✨ Application:</strong> ${recommendations.application_tip}`;
+                recommendationsContainer.appendChild(appCard);
+            }
+            
+            recommendations.top_picks.forEach((product, index) => {
+                const card = document.createElement('div');
+                card.className = 'recommendation-card';
+                card.innerHTML = `
+                    <h4>#${index + 1} ${product.name}</h4>
+                    <p><strong>${product.style_type}</strong></p>
+                    <p>${product.description}</p>
+                    <div>
+                        <span class="badge badge-primary">${product.category}</span>
+                        <span class="badge badge-success">${product.intensity}</span>
+                        <span class="badge badge-info">${product.look}</span>
+                    </div>
+                `;
+                card.onclick = () => {
+                    const options = Array.from(document.querySelectorAll('.eyelash-option'));
+                    const option = options.find(opt => opt.textContent.trim() === product.name);
+                    if (option) {
+                        selectEyelash(product.name, option);
+                        option.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    }
+                };
+                card.style.cursor = 'pointer';
+                recommendationsContainer.appendChild(card);
+            });
+            
+            recommendationsSection.style.display = 'block';
+        }
+        
+        // ---------- RESET ----------
+        resetBtn.onclick = () => {
+            currentImage = null;
+            selectedEyelash = null;
+            imagePreview.classList.remove('active');
+            resultCanvas.style.display = 'none';
+            uploadPrompt.style.display = 'block';
+            resetBtn.style.display = 'none';
+            tryOnBtn.disabled = true;
+            recommendBtn.disabled = true;
+            applyAdjustments.disabled = true;
+            recommendationsSection.style.display = 'none';
+            
+            document.querySelectorAll('.eyelash-option').forEach(opt => {
+                opt.classList.remove('selected');
+            });
+            
+            fileUpload.value = '';
+        };
+        
+        // ---------- EYELASH IMAGE LOADER ----------
+        async function loadEyelashImage(name) {
+            if (eyelashImages[name]) {
+                return eyelashImages[name];
+            }
+            
+            return new Promise((resolve, reject) => {
+                const img = new Image();
+                img.onload = () => {
+                    eyelashImages[name] = img;
+                    resolve(img);
+                };
+                img.onerror = () => reject(new Error(`Could not load eyelash image: ${name}`));
+                img.src = `eyelashes/${name}.png`;
+            });
+        }
+        
+        // ---------- INITIALIZE APP ----------
+        initializeEyelashGrid();
     </script>
 </body>
 </html>
