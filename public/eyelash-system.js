@@ -31,84 +31,487 @@ class EyelashRecommendationSystem {
         this.LEFT_EYE_INNER = 362;
         this.LEFT_EYE_OUTER = 263;
         
-        this.inventory = {
-            "Cat Eye Styles": {
-                "Foxy": {
-                    "suitable_sizes": ["Small", "Medium", "Large"],
-                    "suitable_shapes": ["Almond", "Round", "Upturned"],
-                    "style_type": "Elongating & Dramatic",
-                    "description": "Perfect cat eye with outer corner emphasis",
-                    "intensity": "Medium",
-                    "look": "Soft Glam"
-                },
-                "Drunk In Love": {
-                    "suitable_sizes": ["Small", "Medium"],
-                    "suitable_shapes": ["Almond", "Round", "Upturned", "Downturned"],
-                    "style_type": "Subtle Cat Eye",
-                    "description": "Soft cat eye effect for everyday glamour",
-                    "intensity": "Medium",
-                    "look": "Glam"
-                },
-                "Other Half 2": {
-                    "suitable_sizes": ["Small"],
-                    "suitable_shapes": ["Almond", "Round", "Upturned", "Hooded"],
-                    "style_type": "Delicate Cat Eye",
-                    "description": "Lightweight cat eye for smaller eyes",
-                    "intensity": "Medium",
-                    "look": "Lifted"
-                },
-                "Vixen": {
-                    "suitable_sizes": ["Large"],
-                    "suitable_shapes": ["Almond", "Round", "Upturned"],
-                    "style_type": "Bold Cat Eye",
-                    "description": "Dramatic cat eye for larger eyes",
-                    "intensity": "Heavy",
-                    "look": "Dramatic"
-                }
+        // New inventory structure based on eye shape and size combinations
+        this.recommendations = {
+            "Almond": {
+                "Small": [
+                    {
+                        name: "Other Half 1",
+                        description: "Soft, natural half-lash with gentle cat-eye lift",
+                        style_type: "Natural Half-Lash",
+                        intensity: "Natural",
+                        look: "Subtle Lift",
+                        priority: 1
+                    },
+                    {
+                        name: "Iconic",
+                        description: "Universal slight cat/doll, medium–heavy but still balanced",
+                        style_type: "Cat-Doll Hybrid",
+                        intensity: "Medium-Heavy",
+                        look: "Versatile Glam",
+                        priority: 2
+                    },
+                    {
+                        name: "Drunk in Love",
+                        description: "Proper cat-eye glam, great when they want more drama",
+                        style_type: "Cat Eye",
+                        intensity: "Medium",
+                        look: "Dramatic Glam",
+                        priority: 3
+                    }
+                ],
+                "Medium": [
+                    {
+                        name: "Wedding Day",
+                        description: "Medium doll-eye, universal, soft but defined",
+                        style_type: "Doll Eye",
+                        intensity: "Medium",
+                        look: "Romantic",
+                        priority: 1
+                    },
+                    {
+                        name: "Iconic",
+                        description: "Wispy, medium–heavy, glam but versatile",
+                        style_type: "Wispy Glam",
+                        intensity: "Medium-Heavy",
+                        look: "Versatile",
+                        priority: 2
+                    },
+                    {
+                        name: "Foxy",
+                        description: "Soft cat-eye, super wispy, flattering for medium eyes",
+                        style_type: "Soft Cat Eye",
+                        intensity: "Medium",
+                        look: "Soft Glam",
+                        priority: 3
+                    }
+                ],
+                "Large": [
+                    {
+                        name: "Wedding Day",
+                        description: "Soft option that doesn't overwhelm large eyes",
+                        style_type: "Soft Doll Eye",
+                        intensity: "Medium",
+                        look: "Elegant",
+                        priority: 1
+                    },
+                    {
+                        name: "Foxy",
+                        description: "Wispy cat-eye that frames large eyes beautifully",
+                        style_type: "Wispy Cat Eye",
+                        intensity: "Medium",
+                        look: "Framing",
+                        priority: 2
+                    },
+                    {
+                        name: "Vixen",
+                        description: "Heavy cat-eye for full-on drama on big almond eyes",
+                        style_type: "Bold Cat Eye",
+                        intensity: "Heavy",
+                        look: "Full Drama",
+                        priority: 3
+                    }
+                ]
             },
-            "Doll Eye Styles": {
-                "Iconic": {
-                    "suitable_sizes": ["Small", "Medium", "Large"],
-                    "suitable_shapes": ["Round", "Almond", "Upturned", "Downturned", "Hooded"],
-                    "style_type": "Universal Doll Eye",
-                    "description": "Classic doll eye - works for everyone",
-                    "intensity": "Medium-Heavy",
-                    "look": "Versatile"
-                },
-                "Wedding Day": {
-                    "suitable_sizes": ["Small", "Medium"],
-                    "suitable_shapes": ["Round", "Almond", "Upturned", "Downturned", "Hooded"],
-                    "style_type": "Romantic Doll Eye",
-                    "description": "Soft, romantic doll effect",
-                    "intensity": "Medium",
-                    "look": "Versatile"
-                },
-                "Staycation": {
-                    "suitable_sizes": ["Large"],
-                    "suitable_shapes": ["Round", "Almond", "Upturned"],
-                    "style_type": "Voluminous Doll Eye",
-                    "description": "Full, dramatic doll eye for larger eyes",
-                    "intensity": "Heavy",
-                    "look": "Dramatic"
-                }
+            "Round": {
+                "Small": [
+                    {
+                        name: "Other Half 1",
+                        description: "Soft half-lash, adds length at outer corner without closing the eye",
+                        style_type: "Natural Half-Lash",
+                        intensity: "Natural",
+                        look: "Subtle Length",
+                        priority: 1
+                    },
+                    {
+                        name: "Other Half 2",
+                        description: "Cat-eye half-lash, elongates and lifts outer corner",
+                        style_type: "Cat-Eye Half-Lash",
+                        intensity: "Medium",
+                        look: "Lifted",
+                        priority: 2
+                    },
+                    {
+                        name: "Drunk in Love",
+                        description: "Full cat-eye for a stronger elongating effect",
+                        style_type: "Cat Eye",
+                        intensity: "Medium",
+                        look: "Elongating",
+                        priority: 3
+                    }
+                ],
+                "Medium": [
+                    {
+                        name: "Wedding Day",
+                        description: "Soft doll-eye, opens the eye without making it too round",
+                        style_type: "Soft Doll Eye",
+                        intensity: "Medium",
+                        look: "Opening",
+                        priority: 1
+                    },
+                    {
+                        name: "Foxy",
+                        description: "Soft cat-eye, elongates and balances roundness",
+                        style_type: "Soft Cat Eye",
+                        intensity: "Medium",
+                        look: "Balancing",
+                        priority: 2
+                    },
+                    {
+                        name: "Iconic",
+                        description: "Slight cat-eye, wispy glam for more intensity",
+                        style_type: "Wispy Cat-Glam",
+                        intensity: "Medium-Heavy",
+                        look: "Intense Glam",
+                        priority: 3
+                    }
+                ],
+                "Large": [
+                    {
+                        name: "Foxy",
+                        description: "Soft cat-eye to elongate and frame large round eyes",
+                        style_type: "Soft Cat Eye",
+                        intensity: "Medium",
+                        look: "Elongating Frame",
+                        priority: 1
+                    },
+                    {
+                        name: "Vixen",
+                        description: "Heavy cat-eye for strong outer-corner elongation",
+                        style_type: "Bold Cat Eye",
+                        intensity: "Heavy",
+                        look: "Strong Elongation",
+                        priority: 2
+                    },
+                    {
+                        name: "Staycation",
+                        description: "Heavy doll-eye for those who want big 'doll' drama",
+                        style_type: "Voluminous Doll Eye",
+                        intensity: "Heavy",
+                        look: "Doll Drama",
+                        priority: 3
+                    }
+                ]
             },
-            "Natural Styles": {
-                "Flare": {
-                    "suitable_sizes": ["Small", "Medium"],
-                    "suitable_shapes": ["Almond", "Upturned", "Downturned", "Round"],
-                    "style_type": "Natural with Subtle Flare",
-                    "description": "Natural look with gentle outer corner lift",
-                    "intensity": "Natural",
-                    "look": "Natural"
-                },
-                "Other Half 1": {
-                    "suitable_sizes": ["Small"],
-                    "suitable_shapes": ["Hooded"],
-                    "style_type": "Natural for Hooded Eyes",
-                    "description": "Specially designed for small hooded eyes",
-                    "intensity": "Natural",
-                    "look": "Natural"
-                }
+            "Hooded": {
+                "Small": [
+                    {
+                        name: "Flare",
+                        description: "Natural doll-eye specifically designed for small hooded eyes",
+                        style_type: "Natural Doll Eye",
+                        intensity: "Natural",
+                        look: "Hooded-Friendly",
+                        priority: 1
+                    },
+                    {
+                        name: "Other Half 1",
+                        description: "Very natural half-lash, ideal for small hooded lids",
+                        style_type: "Natural Half-Lash",
+                        intensity: "Natural",
+                        look: "Lightweight",
+                        priority: 2
+                    },
+                    {
+                        name: "Drunk in Love",
+                        description: "Proper cat-eye, perfect when they want a glam lifted look",
+                        style_type: "Cat Eye",
+                        intensity: "Medium",
+                        look: "Glam Lift",
+                        priority: 3
+                    }
+                ],
+                "Medium": [
+                    {
+                        name: "Other Half 2",
+                        description: "Cat-eye half-lash, lifts outer corners without weighing down the lid",
+                        style_type: "Cat-Eye Half-Lash",
+                        intensity: "Medium",
+                        look: "Lifted",
+                        priority: 1
+                    },
+                    {
+                        name: "Foxy",
+                        description: "Soft cat-eye, wispy and hooded-friendly for medium eyes",
+                        style_type: "Soft Cat Eye",
+                        intensity: "Medium",
+                        look: "Wispy Lift",
+                        priority: 2
+                    },
+                    {
+                        name: "Iconic",
+                        description: "Universal wispy glam, slight cat-eye, for fuller looks",
+                        style_type: "Wispy Glam",
+                        intensity: "Medium-Heavy",
+                        look: "Fuller Glam",
+                        priority: 3
+                    }
+                ],
+                "Large": [
+                    {
+                        name: "Other Half 2",
+                        description: "Softer half-lash option for lift without bulk",
+                        style_type: "Cat-Eye Half-Lash",
+                        intensity: "Medium",
+                        look: "Soft Lift",
+                        priority: 1
+                    },
+                    {
+                        name: "Foxy",
+                        description: "Wispy cat-eye, great for large hooded eyes",
+                        style_type: "Wispy Cat Eye",
+                        intensity: "Medium",
+                        look: "Flattering",
+                        priority: 2
+                    },
+                    {
+                        name: "Vixen",
+                        description: "Heavy cat-eye, best for bold looks on big/medium hooded eyes",
+                        style_type: "Bold Cat Eye",
+                        intensity: "Heavy",
+                        look: "Bold Drama",
+                        priority: 3
+                    }
+                ]
+            },
+            "Monolid": {
+                "Small": [
+                    {
+                        name: "Flare",
+                        description: "Natural doll-eye, light and suitable for small eyes",
+                        style_type: "Natural Doll Eye",
+                        intensity: "Natural",
+                        look: "Light & Natural",
+                        priority: 1
+                    },
+                    {
+                        name: "Other Half 1",
+                        description: "Natural half-lash, adds outer lift without overpowering",
+                        style_type: "Natural Half-Lash",
+                        intensity: "Natural",
+                        look: "Subtle Lift",
+                        priority: 2
+                    },
+                    {
+                        name: "Drunk in Love",
+                        description: "Cat-eye option for a stronger elongated effect",
+                        style_type: "Cat Eye",
+                        intensity: "Medium",
+                        look: "Elongated",
+                        priority: 3
+                    }
+                ],
+                "Medium": [
+                    {
+                        name: "Wedding Day",
+                        description: "Balanced doll-eye, suits all shapes and sizes",
+                        style_type: "Universal Doll Eye",
+                        intensity: "Medium",
+                        look: "Balanced",
+                        priority: 1
+                    },
+                    {
+                        name: "Iconic",
+                        description: "Universal slight cat-eye/doll, medium–heavy glam",
+                        style_type: "Cat-Doll Hybrid",
+                        intensity: "Medium-Heavy",
+                        look: "Versatile Glam",
+                        priority: 2
+                    },
+                    {
+                        name: "Foxy",
+                        description: "Soft cat-eye, wispy, flattering for medium monolids",
+                        style_type: "Soft Cat Eye",
+                        intensity: "Medium",
+                        look: "Wispy Glam",
+                        priority: 3
+                    }
+                ],
+                "Large": [
+                    {
+                        name: "Wedding Day",
+                        description: "Softer everyday option for large eyes",
+                        style_type: "Soft Doll Eye",
+                        intensity: "Medium",
+                        look: "Everyday Glam",
+                        priority: 1
+                    },
+                    {
+                        name: "Foxy",
+                        description: "Wispy cat-eye to shape and define",
+                        style_type: "Wispy Cat Eye",
+                        intensity: "Medium",
+                        look: "Defining",
+                        priority: 2
+                    },
+                    {
+                        name: "Staycation",
+                        description: "Heavy, fluffy doll-eye for maximum drama on big monolid eyes",
+                        style_type: "Voluminous Doll Eye",
+                        intensity: "Heavy",
+                        look: "Maximum Drama",
+                        priority: 3
+                    }
+                ]
+            },
+            "Downturned": {
+                "Small": [
+                    {
+                        name: "Other Half 1",
+                        description: "Soft half-lash, subtle lift at outer corner",
+                        style_type: "Natural Half-Lash",
+                        intensity: "Natural",
+                        look: "Subtle Lift",
+                        priority: 1
+                    },
+                    {
+                        name: "Other Half 2",
+                        description: "Cat-eye half-lash, stronger outer-corner lift",
+                        style_type: "Cat-Eye Half-Lash",
+                        intensity: "Medium",
+                        look: "Strong Lift",
+                        priority: 2
+                    },
+                    {
+                        name: "Drunk in Love",
+                        description: "Full cat-eye for noticeable uplift and glam",
+                        style_type: "Cat Eye",
+                        intensity: "Medium",
+                        look: "Uplifting Glam",
+                        priority: 3
+                    }
+                ],
+                "Medium": [
+                    {
+                        name: "Other Half 2",
+                        description: "Precise outer-corner lift without too much volume",
+                        style_type: "Cat-Eye Half-Lash",
+                        intensity: "Medium",
+                        look: "Precise Lift",
+                        priority: 1
+                    },
+                    {
+                        name: "Foxy",
+                        description: "Soft cat-eye, elongates and lifts the eye's silhouette",
+                        style_type: "Soft Cat Eye",
+                        intensity: "Medium",
+                        look: "Lifting",
+                        priority: 2
+                    },
+                    {
+                        name: "Iconic",
+                        description: "Wispy slight cat-eye to enhance and glam up",
+                        style_type: "Wispy Cat-Glam",
+                        intensity: "Medium-Heavy",
+                        look: "Enhanced Glam",
+                        priority: 3
+                    }
+                ],
+                "Large": [
+                    {
+                        name: "Other Half 2",
+                        description: "Lighter half-lash for subtle correction",
+                        style_type: "Cat-Eye Half-Lash",
+                        intensity: "Medium",
+                        look: "Subtle Correction",
+                        priority: 1
+                    },
+                    {
+                        name: "Foxy",
+                        description: "Soft cat-eye, very flattering for large downturned eyes",
+                        style_type: "Soft Cat Eye",
+                        intensity: "Medium",
+                        look: "Flattering",
+                        priority: 2
+                    },
+                    {
+                        name: "Vixen",
+                        description: "Heavy cat-eye for dramatic lifting effect",
+                        style_type: "Bold Cat Eye",
+                        intensity: "Heavy",
+                        look: "Dramatic Lift",
+                        priority: 3
+                    }
+                ]
+            },
+            "Upturned": {
+                "Small": [
+                    {
+                        name: "Flare",
+                        description: "Natural doll-eye for everyday, keeps the look soft",
+                        style_type: "Natural Doll Eye",
+                        intensity: "Natural",
+                        look: "Soft Everyday",
+                        priority: 1
+                    },
+                    {
+                        name: "Wedding Day",
+                        description: "Medium doll-eye for a balanced, open look",
+                        style_type: "Doll Eye",
+                        intensity: "Medium",
+                        look: "Balanced",
+                        priority: 2
+                    },
+                    {
+                        name: "Other Half 1",
+                        description: "Soft half-lash for a gentle outer emphasis",
+                        style_type: "Natural Half-Lash",
+                        intensity: "Natural",
+                        look: "Gentle Emphasis",
+                        priority: 3
+                    }
+                ],
+                "Medium": [
+                    {
+                        name: "Wedding Day",
+                        description: "Universal doll-eye, ideal baseline choice",
+                        style_type: "Universal Doll Eye",
+                        intensity: "Medium",
+                        look: "Universal",
+                        priority: 1
+                    },
+                    {
+                        name: "Iconic",
+                        description: "Slight cat-eye/doll, wispy glam for more intensity",
+                        style_type: "Wispy Glam",
+                        intensity: "Medium-Heavy",
+                        look: "Intense Glam",
+                        priority: 2
+                    },
+                    {
+                        name: "Foxy",
+                        description: "Soft cat-eye for those who want a more elongated, sultry look",
+                        style_type: "Soft Cat Eye",
+                        intensity: "Medium",
+                        look: "Sultry",
+                        priority: 3
+                    }
+                ],
+                "Large": [
+                    {
+                        name: "Wedding Day",
+                        description: "Soft option for big upturned eyes",
+                        style_type: "Soft Doll Eye",
+                        intensity: "Medium",
+                        look: "Soft Glam",
+                        priority: 1
+                    },
+                    {
+                        name: "Foxy",
+                        description: "Wispy cat-eye to define outer corners",
+                        style_type: "Wispy Cat Eye",
+                        intensity: "Medium",
+                        look: "Defining",
+                        priority: 2
+                    },
+                    {
+                        name: "Staycation",
+                        description: "Heavy fluffy doll-eye for full glam and volume",
+                        style_type: "Voluminous Doll Eye",
+                        intensity: "Heavy",
+                        look: "Full Glam",
+                        priority: 3
+                    }
+                ]
             }
         };
     }
@@ -227,11 +630,23 @@ class EyelashRecommendationSystem {
         const angle = measurements.avg_eye_angle;
         const lidVisibility = measurements.avg_lid_visibility;
         
+        // Check for hooded eyes first
         if (lidVisibility < 0.3) {
             return "Hooded";
-        } else if (ear > 0.5) {
+        }
+        
+        // Check for monolid (very low lid visibility with specific characteristics)
+        if (lidVisibility < 0.35 && ear < 0.4) {
+            return "Monolid";
+        }
+        
+        // Check for round eyes
+        if (ear > 0.5) {
             return "Round";
-        } else if (ear < 0.35) {
+        }
+        
+        // Check for almond, upturned, and downturned based on aspect ratio and angle
+        if (ear < 0.35) {
             if (angle > 2) {
                 return "Upturned";
             } else if (angle < -2) {
@@ -274,82 +689,53 @@ class EyelashRecommendationSystem {
         }
     }
     
-    calculateMatchScore(shape, size, spacing, productDetails) {
-        let score = 100;
-        
-        if (shape === "Hooded" && productDetails.suitable_shapes.includes("Hooded")) {
-            score += 50;
-        }
-        
-        if (productDetails.suitable_sizes.length === 3) {
-            score += 10;
-        }
-        if (productDetails.suitable_shapes.length >= 4) {
-            score += 10;
-        }
-        
-        if (["Round", "Downturned"].includes(shape) && productDetails.style_type.includes("Cat Eye")) {
-            score += 20;
-        }
-        
-        if (["Almond", "Upturned"].includes(shape) && productDetails.style_type.includes("Doll Eye")) {
-            score += 15;
-        }
-        
-        if (size === "Small" && productDetails.style_type.includes("Natural")) {
-            score += 15;
-        }
-        
-        return score;
-    }
-    
     recommendEyelashes(shape, size, spacing) {
-        const recommendedProducts = [];
+        // Get recommendations based on shape and size
+        const products = this.recommendations[shape]?.[size] || [];
         
-        for (const [category, products] of Object.entries(this.inventory)) {
-            for (const [productName, details] of Object.entries(products)) {
-                const sizeMatch = details.suitable_sizes.includes(size);
-                const shapeMatch = details.suitable_shapes.includes(shape);
-                
-                if (sizeMatch && shapeMatch) {
-                    recommendedProducts.push({
-                        name: productName,
-                        category: category,
-                        style_type: details.style_type,
-                        description: details.description,
-                        intensity: details.intensity,
-                        look: details.look,
-                        match_score: this.calculateMatchScore(shape, size, spacing, details)
-                    });
-                }
-            }
-        }
+        // Add match scores based on priority
+        const recommendedProducts = products.map(product => ({
+            ...product,
+            match_score: 100 - (product.priority - 1) * 10,
+            category: this.getCategoryFromStyleType(product.style_type)
+        }));
         
-        recommendedProducts.sort((a, b) => b.match_score - a.match_score);
-        
-        const topRecommendations = recommendedProducts.slice(0, 3);
-        
+        // Application tips based on spacing
         const spacingTips = {
-            "Close-set": "Focus application on outer 2/3 of lash line to create width",
-            "Wide-set": "Focus application on inner 2/3 of lash line to bring eyes closer",
-            "Average-set": "Apply evenly across entire lash line for balanced look"
+            "Close-set": "Focus application on outer 2/3 of lash line to create width and balance",
+            "Wide-set": "Focus application on inner 2/3 of lash line to bring eyes closer together",
+            "Average-set": "Apply evenly across entire lash line for a balanced, harmonious look"
         };
         
+        // Shape-specific tips
         const shapeTips = {
-            "Hooded": "Your hooded eyes look best with curled, wispy lashes that lift and open the eye. Avoid heavy styles.",
-            "Round": "Elongate your beautiful round eyes with cat-eye styles that emphasize the outer corners.",
-            "Almond": "Lucky you! Your almond eyes are versatile and can rock any lash style - go bold!",
-            "Downturned": "Lift your eye shape with curled lashes that have extra volume at the outer corners.",
-            "Upturned": "Balance your naturally lifted eyes with even length across the lash line."
+            "Hooded": "Your hooded eyes look stunning with curled, wispy lashes that lift and open the eye. Avoid heavy styles that can weigh down your lid.",
+            "Round": "Elongate your beautiful round eyes with cat-eye styles that emphasize the outer corners for a sultry, balanced look.",
+            "Almond": "Lucky you! Your almond eyes are incredibly versatile and can rock any lash style - experiment with different looks!",
+            "Downturned": "Lift and enhance your eye shape with curled lashes that have extra volume at the outer corners for an uplifting effect.",
+            "Upturned": "Balance your naturally lifted eyes with even length across the lash line or doll-eye styles for a harmonious look.",
+            "Monolid": "Your monolid eyes look gorgeous with styles that add dimension and definition. Focus on curl and length to make your eyes pop!"
         };
         
         return {
-            top_picks: topRecommendations,
+            top_picks: recommendedProducts,
             all_suitable: recommendedProducts,
-            application_tip: spacingTips[spacing] || "",
-            shape_tip: shapeTips[shape] || "",
+            application_tip: spacingTips[spacing] || "Apply lashes evenly for best results",
+            shape_tip: shapeTips[shape] || "Choose lashes that complement your unique eye shape",
             total_matches: recommendedProducts.length
         };
+    }
+    
+    getCategoryFromStyleType(styleType) {
+        if (styleType.includes("Cat")) {
+            return "Cat Eye Styles";
+        } else if (styleType.includes("Doll")) {
+            return "Doll Eye Styles";
+        } else if (styleType.includes("Natural") || styleType.includes("Half-Lash")) {
+            return "Natural Styles";
+        } else {
+            return "Specialty Styles";
+        }
     }
     
     async analyzeAndRecommend(imageElement) {
@@ -358,7 +744,7 @@ class EyelashRecommendationSystem {
         const predictions = await this.faceMeshModel.estimateFaces(imageElement);
         
         if (!predictions || predictions.length === 0) {
-            throw new Error("No face detected in image");
+            throw new Error("No face detected in image. Please ensure your face is clearly visible and well-lit.");
         }
         
         const landmarks = predictions[0].keypoints;
