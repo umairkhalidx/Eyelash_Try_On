@@ -181,6 +181,7 @@ body {
     gap: 15px;
     justify-content: center;
     width: 100%;
+    flex-direction: row;
 }
 
 .control-btn {
@@ -765,8 +766,13 @@ body {
     }
 
     .upload-controls {
-        flex-direction: column;
-        align-items: center;
+        flex-direction: row;
+        gap: 10px;
+    }
+
+    .control-btn {
+        flex: 1;
+        min-width: 0;
     }
 
     .switcher-buttons {
@@ -815,7 +821,6 @@ body {
 
     .image-container {
         padding: 10px 10px 90px 10px;
-        /* More bottom padding on smaller screens */
     }
 
     .image-preview-wrapper {
@@ -834,6 +839,13 @@ body {
     .control-btn {
         padding: 8px 12px;
         font-size: 12px;
+        flex: 1;
+        min-width: 0;
+    }
+
+    .upload-controls {
+        flex-direction: row;
+        gap: 8px;
     }
 
     .controls-layout {
