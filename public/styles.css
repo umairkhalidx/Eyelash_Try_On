@@ -259,13 +259,18 @@ body {
 .face-guide-box {
     position: absolute;
     border: 3px solid #b56288;
-    width: 280px;
-    height: 360px;
+    width: 70%;
+    max-width: 280px;
+    height: 60%;
+    max-height: 400px;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
     pointer-events: none;
-    border-radius: 4px;
+    border-radius: 50%;
+    /* Make it an oval/circle to better match a face shape, or keep it boxy but rounded */
+    border-radius: 120px;
+    /* Example for an oval shape - adjusting to user preference roughly valid for a face */
 }
 
 .capture-btn {

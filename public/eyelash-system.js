@@ -976,6 +976,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const cameraBtn = document.getElementById('cameraBtn');
     const fileInput = document.getElementById('fileInput');
     const uploadBtnBottom = document.getElementById('uploadBtnBottom');
+    const downloadBtn = document.getElementById('downloadBtn');
     const cameraBtnBottom = document.getElementById('cameraBtnBottom');
     const fileInputBottom = document.getElementById('fileInputBottom');
     const videoContainer = document.getElementById('videoContainer');
@@ -1013,6 +1014,7 @@ document.addEventListener('DOMContentLoaded', function () {
         imageContainer.style.display = 'none';
         videoContainer.style.display = 'none';
         bottomControls.style.display = 'none';
+        if (downloadBtn) downloadBtn.style.display = 'none';
         uploadSection.style.display = 'flex';
     }
 
@@ -1022,6 +1024,7 @@ document.addEventListener('DOMContentLoaded', function () {
         fileInput.addEventListener('change', handleFileUpload);
 
         uploadBtnBottom.addEventListener('click', () => fileInputBottom.click());
+        downloadBtn.addEventListener('click', downloadResult);
         cameraBtnBottom.addEventListener('click', startCamera);
         fileInputBottom.addEventListener('change', handleFileUpload);
 
@@ -1146,8 +1149,17 @@ document.addEventListener('DOMContentLoaded', function () {
 
         imagePreview.style.display = 'none';
         resultCanvas.style.display = 'block';
+
+        // Show download button
+        if (downloadBtn) downloadBtn.style.display = 'flex';
+
         // Show adjustment controls only when eyelash is applied
         adjustmentControls.style.display = 'block';
+
+        // Auto-scroll to image area
+        setTimeout(() => {
+            imageContainer.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }, 100);
     }
 
     // Mode Selection
@@ -1408,6 +1420,19 @@ document.addEventListener('DOMContentLoaded', function () {
             ${recommendations.shape_tip ? `<p class="tip">💡 ${recommendations.shape_tip}</p>` : ''}
             ${recommendations.application_tip ? `<p class="tip">✨ ${recommendations.application_tip}</p>` : ''}
         `;
+    }
+
+    // Download Result
+    function downloadResult() {
+        if (!resultCanvas) return;
+
+        // Create a temporary link
+        const link = document.createElement('a');
+        link.download = 'eyelash-tryon-result.png';
+        link.href = resultCanvas.toDataURL('image/png');
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
     }
 
     // Initialize app
