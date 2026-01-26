@@ -423,37 +423,44 @@ body {
 }
 
 .mode-selection {
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
+    background: #f8f9fa;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 20px;
 }
 
 .mode-selection h2 {
-    font-size: 24px;
-    margin-bottom: 10px;
+    font-size: 20px;
+    margin-bottom: 15px;
+    color: #333;
 }
 
 .mode-btn {
-    padding: 20px;
+    padding: 12px 20px;
     background: #fff;
     border: 2px solid #ddd;
-    border-radius: 8px;
+    border-radius: 6px;
     cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
     transition: all 0.3s;
-    text-align: left;
+    flex: 1;
+}
+
+.mode-selection .mode-buttons {
+    display: flex;
+    gap: 10px;
 }
 
 .mode-btn:hover {
     border-color: #b56288;
-    box-shadow: 0 4px 12px rgba(181, 98, 136, 0.1);
     background: #ffe8f0;
 }
 
 .mode-btn span {
-    display: block;
-    font-size: 18px;
-    font-weight: 600;
-    margin-bottom: 5px;
+    font-size: 14px;
+    font-weight: 500;
+    margin: 0;
 }
 
 .mode-btn small {
