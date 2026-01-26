@@ -236,7 +236,6 @@ body {
     padding: 15px;
     z-index: 10;
     background: transparent;
-    border-top: 1px solid #f0e8e3;
 }
 
 /* Video Container */
@@ -775,16 +774,20 @@ body {
     }
 
     .image-container {
-        padding: 10px;
+        padding: 10px 10px 80px 10px;
     }
 
     .image-preview-wrapper {
-        max-height: 350px;
+        max-height: 300px;
     }
 
     #imagePreview,
     #resultCanvas {
-        max-height: 350px;
+        max-height: 300px;
+    }
+
+    .bottom-controls {
+        padding: 10px;
     }
 }
 
@@ -810,13 +813,18 @@ body {
         font-size: 24px;
     }
 
+    .image-container {
+        padding: 10px 10px 90px 10px;
+        /* More bottom padding on smaller screens */
+    }
+
     .image-preview-wrapper {
-        max-height: 300px;
+        max-height: 250px;
     }
 
     #imagePreview,
     #resultCanvas {
-        max-height: 300px;
+        max-height: 250px;
     }
 
     .bottom-controls {
