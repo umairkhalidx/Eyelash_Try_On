@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -10,11 +11,48 @@
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh"></script>
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/face-landmarks-detection"></script>
 </head>
+
 <body>
     <!-- Header -->
     <header class="main-header">
-        <h1>Eyelash Try On and Recommendation System</h1>
+        <div class="header-top">
+            <img src="logo/Mona-Beauty-Logo.avif" alt="Mona Beauty Logo" class="header-logo">
+            <div class="header-icons">
+                <button class="icon-btn" aria-label="Search">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="11" cy="11" r="8" />
+                        <path d="M21 21l-4.35-4.35" />
+                    </svg>
+                </button>
+                <button class="icon-btn" aria-label="Account">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" />
+                        <circle cx="12" cy="7" r="4" />
+                    </svg>
+                </button>
+                <button class="icon-btn" aria-label="Cart">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z" />
+                        <line x1="3" y1="6" x2="21" y2="6" />
+                        <path d="M16 10a4 4 0 01-8 0" />
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <nav class="header-nav">
+            <a href="#" class="nav-link">GEL FANTASY</a>
+            <a href="#" class="nav-link">LASH O CLOCK</a>
+            <a href="#" class="nav-link">LUXTENSION</a>
+            <a href="#" class="nav-link">NAIL O CLOCK</a>
+            <a href="#" class="nav-link">SET N FORGET</a>
+            <a href="#" class="nav-link">SPONGE O CLOCK</a>
+        </nav>
     </header>
+
+    <!-- Page Title -->
+    <div class="page-title-section">
+        <h1 class="page-title">Eyelash Tryon & Recommendation</h1>
+    </div>
 
     <div class="container">
         <!-- Main Layout -->
@@ -30,15 +68,18 @@
                         </div>
                         <div class="upload-controls">
                             <button class="control-btn" id="uploadBtn">
-                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/>
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2">
+                                    <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12" />
                                 </svg>
                                 Upload
                             </button>
                             <button class="control-btn" id="cameraBtn">
-                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/>
-                                    <circle cx="12" cy="13" r="4"/>
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2">
+                                    <path
+                                        d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z" />
+                                    <circle cx="12" cy="13" r="4" />
                                 </svg>
                                 Camera
                             </button>
@@ -52,7 +93,7 @@
                         <div class="face-guide-box"></div>
                         <button class="capture-btn" id="captureBtn">
                             <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
-                                <circle cx="12" cy="12" r="10"/>
+                                <circle cx="12" cy="12" r="10" />
                             </svg>
                         </button>
                     </div>
@@ -67,15 +108,18 @@
                         <div class="bottom-controls" id="bottomControls" style="display: none;">
                             <div class="upload-controls">
                                 <button class="control-btn" id="uploadBtnBottom">
-                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                        <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/>
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2">
+                                        <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12" />
                                     </svg>
                                     Upload
                                 </button>
                                 <button class="control-btn" id="cameraBtnBottom">
-                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                        <path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/>
-                                        <circle cx="12" cy="13" r="4"/>
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2">
+                                        <path
+                                            d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z" />
+                                        <circle cx="12" cy="13" r="4" />
                                     </svg>
                                     Camera
                                 </button>
@@ -111,19 +155,41 @@
                 </div>
 
                 <!-- Adjustment Controls (shown after try-on) -->
+                <!-- Adjustment Controls (shown after try-on) -->
                 <div class="adjustment-controls" id="adjustmentControls" style="display: none;">
                     <h2>Adjustment Controls</h2>
-                    <div class="control-row">
-                        <button class="adj-btn" id="upBtn">↑</button>
-                        <button class="adj-btn" id="downBtn">↓</button>
-                        <button class="adj-btn" id="leftBtn">←</button>
-                        <button class="adj-btn" id="rightBtn">→</button>
-                        <button class="adj-btn" id="minusBtn">−</button>
-                        <span class="scale-value" id="scaleValue">2.0</span>
-                        <button class="adj-btn" id="plusBtn">+</button>
-                        <button class="adj-btn" id="rotateLeftBtn">↶</button>
-                        <button class="adj-btn" id="rotateRightBtn">↷</button>
-                        <button class="adj-btn" id="resetBtn">⟲</button>
+                    <div class="controls-layout">
+                        <!-- Left Controls: Directional Pad -->
+                        <div class="d-pad">
+                            <div class="d-pad-top">
+                                <button class="adj-btn" id="upBtn">↑</button>
+                            </div>
+                            <div class="d-pad-bottom">
+                                <button class="adj-btn" id="leftBtn">←</button>
+                                <button class="adj-btn" id="downBtn">↓</button>
+                                <button class="adj-btn" id="rightBtn">→</button>
+                            </div>
+                        </div>
+
+                        <!-- Right Controls: Scale & Rotation -->
+                        <div class="right-controls">
+                            <div class="control-group">
+                                <label>Scale</label>
+                                <div class="btn-row">
+                                    <button class="adj-btn" id="minusBtn">−</button>
+                                    <span class="scale-value" id="scaleValue">2.0</span>
+                                    <button class="adj-btn" id="plusBtn">+</button>
+                                </div>
+                            </div>
+                            <div class="control-group">
+                                <label>Rotation</label>
+                                <div class="btn-row">
+                                    <button class="adj-btn" id="rotateLeftBtn">↶</button>
+                                    <button class="adj-btn" id="resetBtn">⟲</button>
+                                    <button class="adj-btn" id="rotateRightBtn">↷</button>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
@@ -139,18 +205,18 @@
                 <div class="recommend-content" id="recommendContent" style="display: none;">
                     <h2>Get Recommendations</h2>
                     <button class="recommend-btn" id="analyzeBtn">
-                         Analyze My Eyes
+                        Analyze My Eyes
                     </button>
                     <div class="analysis-info" id="analysisInfo">
-                            <!-- Eye analysis info will appear here -->
+                        <!-- Eye analysis info will appear here -->
                     </div>
-                    
+
                     <div class="recommendations-section" id="recommendationsSection" style="display: none;">
                         <h3>Top 3 Recommended Lashes</h3>
                         <div class="top-picks" id="topPicks">
                             <!-- Top recommendations will appear here -->
                         </div>
-                        
+
                         <h3>All Lashes Collection</h3>
                         <div class="lashes-grid" id="allLashesGrid">
                             <!-- All lashes will appear here -->
@@ -170,4 +236,5 @@
     <!-- Include external JS -->
     <script src="eyelash-system.js"></script>
 </body>
+
 </html>
