@@ -1188,6 +1188,11 @@ document.addEventListener('DOMContentLoaded', function () {
             recommendContent.style.display = 'none';
 
             populateLashesGrid(); // Populate grid when entering try-on mode
+
+            // Auto-scroll to try-on content
+            setTimeout(() => {
+                tryOnContent.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }, 100);
         } else {
             switchToTryOn.classList.remove('active');
             switchToRecommend.classList.add('active');
@@ -1198,6 +1203,11 @@ document.addEventListener('DOMContentLoaded', function () {
             tryOnContent.style.display = 'none';
             adjustmentControls.style.display = 'none';
             document.getElementById('recommendationsSection').style.display = 'none';
+
+            // Auto-scroll to recommendation content
+            setTimeout(() => {
+                recommendContent.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }, 100);
         }
     }
 
