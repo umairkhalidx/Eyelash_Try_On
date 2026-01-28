@@ -103,7 +103,47 @@
                         <div class="image-preview-wrapper">
                             <img id="imagePreview" alt="Preview">
                             <canvas id="resultCanvas"></canvas>
+
+                            <!-- Adjustment Controls (Overlay) -->
+                            <div class="adjustment-controls-overlay" id="adjustmentControls" style="display: none;">
+                                <div class="controls-layout">
+                                    <div class="d-pad">
+                                        <div class="d-pad-top">
+                                            <button class="adj-btn" id="upBtn">↑</button>
+                                        </div>
+                                        <div class="d-pad-bottom">
+                                            <button class="adj-btn" id="leftBtn">←</button>
+                                            <button class="adj-btn" id="downBtn">↓</button>
+                                            <button class="adj-btn" id="rightBtn">→</button>
+                                        </div>
+                                    </div>
+
+                                    <div class="right-controls">
+                                        <div class="control-group">
+                                            <div class="btn-row">
+                                                <button class="adj-btn" id="minusBtn">−</button>
+                                                <span class="scale-value" id="scaleValue">2.0</span>
+                                                <button class="adj-btn" id="plusBtn">+</button>
+                                            </div>
+                                        </div>
+                                        <div class="control-group">
+                                            <div class="btn-row">
+                                                <button class="adj-btn" id="rotateLeftBtn">↶</button>
+                                                <button class="adj-btn" id="resetBtn">⟲</button>
+                                                <button class="adj-btn" id="rotateRightBtn">↷</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
+                        <!-- Lashes Horizontal Selection -->
+                        <div class="lashes-selection-container" id="lashesSelectionContainer" style="display: none;">
+                            <div class="lashes-grid" id="lashesGrid">
+                                <!-- Lashes will be populated here -->
+                            </div>
+                        </div>
+
                         <!-- Upload controls at bottom when image is displayed -->
                         <div class="bottom-controls" id="bottomControls" style="display: none;">
                             <div class="upload-controls">
@@ -162,51 +202,9 @@
                 </div>
 
                 <!-- Adjustment Controls (shown after try-on) -->
-                <!-- Adjustment Controls (shown after try-on) -->
-                <div class="adjustment-controls" id="adjustmentControls" style="display: none;">
-                    <h2>Adjustment Controls</h2>
-                    <div class="controls-layout">
-                        <!-- Left Controls: Directional Pad -->
-                        <div class="d-pad">
-                            <div class="d-pad-top">
-                                <button class="adj-btn" id="upBtn">↑</button>
-                            </div>
-                            <div class="d-pad-bottom">
-                                <button class="adj-btn" id="leftBtn">←</button>
-                                <button class="adj-btn" id="downBtn">↓</button>
-                                <button class="adj-btn" id="rightBtn">→</button>
-                            </div>
-                        </div>
+                <!-- Adjustment Controls moved to left panel -->
 
-                        <!-- Right Controls: Scale & Rotation -->
-                        <div class="right-controls">
-                            <div class="control-group">
-                                <label>Scale</label>
-                                <div class="btn-row">
-                                    <button class="adj-btn" id="minusBtn">−</button>
-                                    <span class="scale-value" id="scaleValue">2.0</span>
-                                    <button class="adj-btn" id="plusBtn">+</button>
-                                </div>
-                            </div>
-                            <div class="control-group">
-                                <label>Rotation</label>
-                                <div class="btn-row">
-                                    <button class="adj-btn" id="rotateLeftBtn">↶</button>
-                                    <button class="adj-btn" id="resetBtn">⟲</button>
-                                    <button class="adj-btn" id="rotateRightBtn">↷</button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Try-On Mode Content -->
-                <div class="try-on-content" id="tryOnContent" style="display: none;">
-                    <h2>All Lashes Collection</h2>
-                    <div class="lashes-grid" id="lashesGrid">
-                        <!-- Lashes will be populated here -->
-                    </div>
-                </div>
+                <!-- Try-On Mode Content moved to left panel -->
 
                 <!-- Recommendation Mode Content -->
                 <div class="recommend-content" id="recommendContent" style="display: none;">

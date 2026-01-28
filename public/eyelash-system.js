@@ -1178,23 +1178,31 @@ document.addEventListener('DOMContentLoaded', function () {
         adjustmentControls.style.display = 'none'; // Hide adjustments when switching modes
 
         // Update mode switcher buttons
-        if (mode === 'tryon') {
+        if (currentMode === 'tryon') {
             switchToTryOn.classList.add('active');
             switchToRecommend.classList.remove('active');
             currentModeText.textContent = 'Try-On';
+
+            // Show Try-On specific elements
+            const lashesContainer = document.getElementById('lashesSelectionContainer');
+            if (lashesContainer) lashesContainer.style.display = 'block';
+
+            const adjControls = document.getElementById('adjustmentControls');
+            if (adjControls) adjControls.style.display = 'flex';
+
+            recommendContent.style.display = 'none';
+            populateLashesGrid(); // Populate grid when entering try-on mode
         } else {
             switchToTryOn.classList.remove('active');
             switchToRecommend.classList.add('active');
             currentModeText.textContent = 'Recommendation';
-        }
 
-        if (mode === 'tryon') {
-            populateLashesGrid();
-            tryOnContent.style.display = 'block';
-            recommendContent.style.display = 'none';
-        } else {
-            tryOnContent.style.display = 'none';
+            // Show Recommend specific elements
             recommendContent.style.display = 'block';
+
+            const lashesContainer = document.getElementById('lashesSelectionContainer');
+            if (lashesContainer) lashesContainer.style.display = 'none';
+            adjustmentControls.style.display = 'none';
             document.getElementById('recommendationsSection').style.display = 'none';
         }
     }
