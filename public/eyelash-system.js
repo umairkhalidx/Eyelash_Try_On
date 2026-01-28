@@ -1184,13 +1184,9 @@ document.addEventListener('DOMContentLoaded', function () {
             currentModeText.textContent = 'Try-On';
 
             // Show Try-On specific elements
-            const lashesContainer = document.getElementById('lashesSelectionContainer');
-            if (lashesContainer) lashesContainer.style.display = 'block';
-
-            const adjControls = document.getElementById('adjustmentControls');
-            if (adjControls) adjControls.style.display = 'flex';
-
+            tryOnContent.style.display = 'block';
             recommendContent.style.display = 'none';
+
             populateLashesGrid(); // Populate grid when entering try-on mode
         } else {
             switchToTryOn.classList.remove('active');
@@ -1199,9 +1195,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
             // Show Recommend specific elements
             recommendContent.style.display = 'block';
-
-            const lashesContainer = document.getElementById('lashesSelectionContainer');
-            if (lashesContainer) lashesContainer.style.display = 'none';
+            tryOnContent.style.display = 'none';
             adjustmentControls.style.display = 'none';
             document.getElementById('recommendationsSection').style.display = 'none';
         }
@@ -1250,10 +1244,16 @@ document.addEventListener('DOMContentLoaded', function () {
 
         // Highlight selected
         document.querySelectorAll('.lash-card').forEach(c => c.classList.remove('selected'));
-        document.querySelector(`[data-lash-key="${key}"]`).classList.add('selected');
+        const selectedCard = document.querySelector(`[data-lash-key="${key}"]`);
+        if (selectedCard) selectedCard.classList.add('selected');
 
         // Apply try-on
         await applyTryOn();
+
+        // Auto-scroll to image after selection
+        setTimeout(() => {
+            imageContainer.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }, 300);
     }
 
     async function applyTryOn() {
@@ -1368,7 +1368,8 @@ document.addEventListener('DOMContentLoaded', function () {
         const { classification, measurements, recommendations } = result;
 
         // Show recommendations section
-        document.getElementById('recommendationsSection').style.display = 'block';
+        const recommendationsSection = document.getElementById('recommendationsSection');
+        recommendationsSection.style.display = 'block';
 
         // Display top picks
         const topPicks = document.getElementById('topPicks');
@@ -1428,6 +1429,11 @@ document.addEventListener('DOMContentLoaded', function () {
             ${recommendations.shape_tip ? `<p class="tip">💡 ${recommendations.shape_tip}</p>` : ''}
             ${recommendations.application_tip ? `<p class="tip">✨ ${recommendations.application_tip}</p>` : ''}
         `;
+
+        // Auto-scroll to recommendations after they appear
+        setTimeout(() => {
+            recommendationsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }, 300);
     }
 
     // Download Result

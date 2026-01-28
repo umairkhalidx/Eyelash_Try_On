@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Eyelash Try-On & Recommendation System</title>
     <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-core"></script>
@@ -55,10 +55,33 @@
     </div>
 
     <div class="container">
-        <!-- Main Layout -->
+        <!-- Main Layout - Single Column -->
         <div class="main-layout">
-            <!-- Left Panel - Image Display -->
-            <div class="left-panel">
+
+            <!-- Mode Selection (Initially hidden, appears above image after upload) -->
+            <div class="mode-selection" id="modeSelection" style="display: none;">
+                <h2>Choose Mode</h2>
+                <div class="mode-buttons">
+                    <button class="mode-btn" id="tryOnModeBtn">
+                        <span>Try-On Mode</span>
+                    </button>
+                    <button class="mode-btn" id="recommendModeBtn">
+                        <span>Recommendation Mode</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Mode Switcher (Shown after mode selection, above image) -->
+            <div class="mode-switcher" id="modeSwitcher" style="display: none;">
+                <h2>Current Mode: <span id="currentModeText">Try-On</span></h2>
+                <div class="switcher-buttons">
+                    <button class="switcher-btn active" id="switchToTryOn">Try-On Mode</button>
+                    <button class="switcher-btn" id="switchToRecommend">Recommendation Mode</button>
+                </div>
+            </div>
+
+            <!-- Image Display Section -->
+            <div class="image-display-section">
                 <div class="image-display" id="imageDisplay">
                     <!-- Initial Upload Prompt -->
                     <div class="upload-section" id="uploadSection">
@@ -137,12 +160,6 @@
                                 </div>
                             </div>
                         </div>
-                        <!-- Lashes Horizontal Selection -->
-                        <div class="lashes-selection-container" id="lashesSelectionContainer" style="display: none;">
-                            <div class="lashes-grid" id="lashesGrid">
-                                <!-- Lashes will be populated here -->
-                            </div>
-                        </div>
 
                         <!-- Upload controls at bottom when image is displayed -->
                         <div class="bottom-controls" id="bottomControls" style="display: none;">
@@ -177,58 +194,38 @@
                 </div>
             </div>
 
-            <!-- Right Panel - Options -->
-            <div class="right-panel">
-                <!-- Mode Selection (Initially hidden) -->
-                <div class="mode-selection" id="modeSelection" style="display: none;">
-                    <h2>Choose Mode</h2>
-                    <div class="mode-buttons">
-                        <button class="mode-btn" id="tryOnModeBtn">
-                            <span>Try-On Mode</span>
-                        </button>
-                        <button class="mode-btn" id="recommendModeBtn">
-                            <span>Recommendation Mode</span>
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Mode Switcher (Shown after mode selection) -->
-                <div class="mode-switcher" id="modeSwitcher" style="display: none;">
-                    <h2>Current Mode: <span id="currentModeText">Try-On</span></h2>
-                    <div class="switcher-buttons">
-                        <button class="switcher-btn active" id="switchToTryOn">Try-On Mode</button>
-                        <button class="switcher-btn" id="switchToRecommend">Recommendation Mode</button>
-                    </div>
-                </div>
-
-                <!-- Adjustment Controls (shown after try-on) -->
-                <!-- Adjustment Controls moved to left panel -->
-
-                <!-- Try-On Mode Content moved to left panel -->
-
-                <!-- Recommendation Mode Content -->
-                <div class="recommend-content" id="recommendContent" style="display: none;">
-                    <h2>Get Recommendations</h2>
-                    <button class="recommend-btn" id="analyzeBtn">
-                        Analyze My Eyes
-                    </button>
-                    <div class="analysis-info" id="analysisInfo">
-                        <!-- Eye analysis info will appear here -->
-                    </div>
-
-                    <div class="recommendations-section" id="recommendationsSection" style="display: none;">
-                        <h3>Top 3 Recommended Lashes</h3>
-                        <div class="top-picks" id="topPicks">
-                            <!-- Top recommendations will appear here -->
-                        </div>
-
-                        <h3>All Lashes Collection</h3>
-                        <div class="lashes-grid" id="allLashesGrid">
-                            <!-- All lashes will appear here -->
-                        </div>
+            <!-- Try-On Mode Content (Horizontal Lashes Below Image) -->
+            <div class="try-on-content" id="tryOnContent" style="display: none;">
+                <div class="lashes-selection-container" id="lashesSelectionContainer">
+                    <div class="lashes-grid" id="lashesGrid">
+                        <!-- Lashes will be populated here -->
                     </div>
                 </div>
             </div>
+
+            <!-- Recommendation Mode Content (Below Image) -->
+            <div class="recommend-content" id="recommendContent" style="display: none;">
+                <h2>Get Recommendations</h2>
+                <button class="recommend-btn" id="analyzeBtn">
+                    Analyze My Eyes
+                </button>
+                <div class="analysis-info" id="analysisInfo">
+                    <!-- Eye analysis info will appear here -->
+                </div>
+
+                <div class="recommendations-section" id="recommendationsSection" style="display: none;">
+                    <h3>Top 3 Recommended Lashes</h3>
+                    <div class="top-picks" id="topPicks">
+                        <!-- Top recommendations will appear here -->
+                    </div>
+
+                    <h3>All Lashes Collection</h3>
+                    <div class="lashes-grid" id="allLashesGrid">
+                        <!-- All lashes will appear here -->
+                    </div>
+                </div>
+            </div>
+
         </div>
     </div>
 
