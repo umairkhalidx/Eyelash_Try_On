@@ -290,7 +290,7 @@ body {
 
 .eye-guide-box {
     border: 3px solid #b56288;
-    width: 240px;
+    width: 360px;
     height: 70px;
     border-radius: 12px;
     background: rgba(181, 98, 136, 0.05);
@@ -313,7 +313,7 @@ body {
 
 .guide-text {
     position: absolute;
-    bottom: 80px;
+    top: 20px;
     left: 50%;
     transform: translateX(-50%);
     color: white;
@@ -896,13 +896,13 @@ body {
 
     /* Eye guide responsive */
     .eye-guide-box {
-        width: 200px;
+        width: 300px;
         height: 60px;
     }
 
     .guide-text {
         font-size: 12px;
-        bottom: 60px;
+        top: 15px;
     }
 }
 
@@ -975,13 +975,13 @@ body {
 
     /* Eye guide responsive for small screens */
     .eye-guide-box {
-        width: 170px;
+        width: 260px;
         height: 55px;
     }
 
     .guide-text {
         font-size: 11px;
-        bottom: 50px;
+        top: 10px;
         padding: 6px 12px;
     }
 

@@ -946,6 +946,10 @@ class EyelashTryOnSystem {
         const rx_scaled = rx * supersampleScale;
         const ry_scaled = ry * supersampleScale;
 
+        // NATURAL BLENDING: Set opacity and blur for realistic integration
+        hiResCtx.globalAlpha = 0.82; // More transparency for natural look
+        hiResCtx.filter = 'blur(1.2px)'; // Softer edge blending
+
         // Draw right eye (original orientation) with rotation if needed
         if (rotation_angle !== 0) {
             hiResCtx.save();
@@ -970,6 +974,10 @@ class EyelashTryOnSystem {
             hiResCtx.drawImage(eyelashImage, 0, 0, lw_scaled, lh_scaled);
         }
         hiResCtx.restore();
+
+        // Reset filters and alpha
+        hiResCtx.filter = 'none';
+        hiResCtx.globalAlpha = 1.0;
 
         // Scale down to original size for superior anti-aliasing
         const outputCanvas = document.createElement('canvas');
