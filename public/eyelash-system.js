@@ -902,21 +902,29 @@ class EyelashTryOnSystem {
         const imgWidth = imageElement.width;
         const imgHeight = imageElement.height;
 
-        const outputCanvas = document.createElement('canvas');
-        outputCanvas.width = imgWidth;
-        outputCanvas.height = imgHeight;
-        const ctx = outputCanvas.getContext('2d');
-        // Enable high-quality image smoothing
-        ctx.imageSmoothingEnabled = true;
-        ctx.imageSmoothingQuality = 'high';
+        // SUPERSAMPLING: Render at 2x resolution for better quality
+        const supersampleScale = 2;
+        const hiResWidth = imgWidth * supersampleScale;
+        const hiResHeight = imgHeight * supersampleScale;
 
-        ctx.drawImage(imageElement, 0, 0);
+        const hiResCanvas = document.createElement('canvas');
+        hiResCanvas.width = hiResWidth;
+        hiResCanvas.height = hiResHeight;
+        const hiResCtx = hiResCanvas.getContext('2d', { alpha: true, willReadFrequently: false });
+
+        // Enable all quality settings on high-res canvas
+        hiResCtx.imageSmoothingEnabled = true;
+        hiResCtx.imageSmoothingQuality = 'high';
+
+        // Draw base image at 2x size
+        hiResCtx.drawImage(imageElement, 0, 0, hiResWidth, hiResHeight);
 
         const leftInfo = this.getEyeRegionInfo(landmarks, LEFT_EYE_UPPER, LEFT_EYE_INNER, LEFT_EYE_OUTER, imgWidth, imgHeight);
         const rightInfo = this.getEyeRegionInfo(landmarks, RIGHT_EYE_UPPER, RIGHT_EYE_INNER, RIGHT_EYE_OUTER, imgWidth, imgHeight);
 
         const lashAspect = eyelashImage.width / eyelashImage.height;
 
+        // Use original placement logic (working version)
         const lw = Math.floor(leftInfo.width * size_scale);
         const lh = Math.floor((lw / lashAspect) * height_scale);
         const lx = leftInfo.center_x - lw / 2 + horizontal_offset;
@@ -927,30 +935,51 @@ class EyelashTryOnSystem {
         const rx = rightInfo.center_x - rw / 2 - horizontal_offset;
         const ry = rightInfo.center_y + vertical_offset - rh / 2;
 
+        // Scale coordinates for high-res rendering
+        const lw_scaled = lw * supersampleScale;
+        const lh_scaled = lh * supersampleScale;
+        const lx_scaled = lx * supersampleScale;
+        const ly_scaled = ly * supersampleScale;
+
+        const rw_scaled = rw * supersampleScale;
+        const rh_scaled = rh * supersampleScale;
+        const rx_scaled = rx * supersampleScale;
+        const ry_scaled = ry * supersampleScale;
+
         // Draw right eye (original orientation) with rotation if needed
         if (rotation_angle !== 0) {
-            ctx.save();
-            ctx.translate(rx + rw / 2, ry + rh / 2);
-            ctx.rotate(-rotation_angle * Math.PI / 180);
-            ctx.drawImage(eyelashImage, -rw / 2, -rh / 2, rw, rh);
-            ctx.restore();
+            hiResCtx.save();
+            hiResCtx.translate(rx_scaled + rw_scaled / 2, ry_scaled + rh_scaled / 2);
+            hiResCtx.rotate(-rotation_angle * Math.PI / 180);
+            hiResCtx.drawImage(eyelashImage, -rw_scaled / 2, -rh_scaled / 2, rw_scaled, rh_scaled);
+            hiResCtx.restore();
         } else {
-            ctx.drawImage(eyelashImage, rx, ry, rw, rh);
+            hiResCtx.drawImage(eyelashImage, rx_scaled, ry_scaled, rw_scaled, rh_scaled);
         }
 
         // Draw left eye (flipped) with rotation if needed
-        ctx.save();
+        hiResCtx.save();
         if (rotation_angle !== 0) {
-            ctx.translate(lx + lw / 2, ly + lh / 2);
-            ctx.rotate(rotation_angle * Math.PI / 180);
-            ctx.scale(-1, 1);
-            ctx.drawImage(eyelashImage, -lw / 2, -lh / 2, lw, lh);
+            hiResCtx.translate(lx_scaled + lw_scaled / 2, ly_scaled + lh_scaled / 2);
+            hiResCtx.rotate(rotation_angle * Math.PI / 180);
+            hiResCtx.scale(-1, 1);
+            hiResCtx.drawImage(eyelashImage, -lw_scaled / 2, -lh_scaled / 2, lw_scaled, lh_scaled);
         } else {
-            ctx.translate(lx + lw, ly);
-            ctx.scale(-1, 1);
-            ctx.drawImage(eyelashImage, 0, 0, lw, lh);
+            hiResCtx.translate(lx_scaled + lw_scaled, ly_scaled);
+            hiResCtx.scale(-1, 1);
+            hiResCtx.drawImage(eyelashImage, 0, 0, lw_scaled, lh_scaled);
         }
-        ctx.restore();
+        hiResCtx.restore();
+
+        // Scale down to original size for superior anti-aliasing
+        const outputCanvas = document.createElement('canvas');
+        outputCanvas.width = imgWidth;
+        outputCanvas.height = imgHeight;
+        const ctx = outputCanvas.getContext('2d', { alpha: true, willReadFrequently: false });
+        ctx.imageSmoothingEnabled = true;
+        ctx.imageSmoothingQuality = 'high';
+
+        ctx.drawImage(hiResCanvas, 0, 0, imgWidth, imgHeight);
 
         return outputCanvas;
     }
