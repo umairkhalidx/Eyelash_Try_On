@@ -803,6 +803,9 @@ class EyelashTryOnSystem {
 
         const tempCanvas = document.createElement('canvas');
         const tempCtx = tempCanvas.getContext('2d');
+        // Enable high-quality image smoothing
+        tempCtx.imageSmoothingEnabled = true;
+        tempCtx.imageSmoothingQuality = 'high';
 
         const rad = angle * Math.PI / 180;
         const cos = Math.abs(Math.cos(rad));
@@ -823,9 +826,15 @@ class EyelashTryOnSystem {
 
     overlayTransparentImage(backgroundCanvas, overlayCanvas, x, y, width, height, rotationAngle = 0) {
         const ctx = backgroundCanvas.getContext('2d');
+        // Enable high-quality image smoothing
+        ctx.imageSmoothingEnabled = true;
+        ctx.imageSmoothingQuality = 'high';
 
         const tempCanvas = document.createElement('canvas');
         const tempCtx = tempCanvas.getContext('2d');
+        // Enable high-quality image smoothing for temp canvas
+        tempCtx.imageSmoothingEnabled = true;
+        tempCtx.imageSmoothingQuality = 'high';
         tempCanvas.width = width;
         tempCanvas.height = height;
 
@@ -897,6 +906,9 @@ class EyelashTryOnSystem {
         outputCanvas.width = imgWidth;
         outputCanvas.height = imgHeight;
         const ctx = outputCanvas.getContext('2d');
+        // Enable high-quality image smoothing
+        ctx.imageSmoothingEnabled = true;
+        ctx.imageSmoothingQuality = 'high';
 
         ctx.drawImage(imageElement, 0, 0);
 
@@ -915,22 +927,30 @@ class EyelashTryOnSystem {
         const rx = rightInfo.center_x - rw / 2 - horizontal_offset;
         const ry = rightInfo.center_y + vertical_offset - rh / 2;
 
-        const eyelashCanvas = document.createElement('canvas');
-        eyelashCanvas.width = eyelashImage.width;
-        eyelashCanvas.height = eyelashImage.height;
-        const eyelashCtx = eyelashCanvas.getContext('2d');
-        eyelashCtx.drawImage(eyelashImage, 0, 0);
+        // Draw right eye (original orientation) with rotation if needed
+        if (rotation_angle !== 0) {
+            ctx.save();
+            ctx.translate(rx + rw / 2, ry + rh / 2);
+            ctx.rotate(-rotation_angle * Math.PI / 180);
+            ctx.drawImage(eyelashImage, -rw / 2, -rh / 2, rw, rh);
+            ctx.restore();
+        } else {
+            ctx.drawImage(eyelashImage, rx, ry, rw, rh);
+        }
 
-        const flippedCanvas = document.createElement('canvas');
-        flippedCanvas.width = eyelashImage.width;
-        flippedCanvas.height = eyelashImage.height;
-        const flippedCtx = flippedCanvas.getContext('2d');
-        flippedCtx.translate(eyelashImage.width, 0);
-        flippedCtx.scale(-1, 1);
-        flippedCtx.drawImage(eyelashImage, 0, 0);
-
-        this.overlayTransparentImage(outputCanvas, eyelashCanvas, rx, ry, rw, rh, -rotation_angle);
-        this.overlayTransparentImage(outputCanvas, flippedCanvas, lx, ly, lw, lh, rotation_angle);
+        // Draw left eye (flipped) with rotation if needed
+        ctx.save();
+        if (rotation_angle !== 0) {
+            ctx.translate(lx + lw / 2, ly + lh / 2);
+            ctx.rotate(rotation_angle * Math.PI / 180);
+            ctx.scale(-1, 1);
+            ctx.drawImage(eyelashImage, -lw / 2, -lh / 2, lw, lh);
+        } else {
+            ctx.translate(lx + lw, ly);
+            ctx.scale(-1, 1);
+            ctx.drawImage(eyelashImage, 0, 0, lw, lh);
+        }
+        ctx.restore();
 
         return outputCanvas;
     }
@@ -1450,13 +1470,24 @@ document.addEventListener('DOMContentLoaded', function () {
     function downloadResult() {
         if (!resultCanvas) return;
 
-        // Create a temporary link
-        const link = document.createElement('a');
-        link.download = 'eyelash-tryon-result.png';
-        link.href = resultCanvas.toDataURL('image/png');
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
+        // Use toBlob instead of toDataURL to avoid tainted canvas issues
+        resultCanvas.toBlob((blob) => {
+            if (!blob) {
+                alert('Failed to create image. Please try again.');
+                return;
+            }
+
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.download = 'eyelash-tryon-result.png';
+            link.href = url;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+
+            // Clean up the blob URL
+            setTimeout(() => URL.revokeObjectURL(url), 100);
+        }, 'image/png');
     }
 
     // Initialize app
